@@ -106,14 +106,3 @@ def players_from_pref_dict(prefs):
     for (k,v) in fixed_preferences.items():
         players[k].set_prefs(v)
     return list(players.values())
-
-test_preferences = {
-    1: [3, 4, 2, 6, 5], 
-    2: [6, 5, 4, 1, 3], 
-    3: [2, 4, 5, 1, 6], 
-    4: [5, 2, 3, 6, 1], 
-    5: [3, 1, 2, 4, 6], 
-    6: [5, 1, 3, 4, 2]}
-
-def matching_from_pref_dict(prefs):
-    return stable_roommates(players_from_pref_dict(prefs))

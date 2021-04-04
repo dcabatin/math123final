@@ -1,3 +1,5 @@
+from player import *
+
 def _delete_pair(player, other):
     """Make a player forget another (and vice versa), deleting the pair from
     further consideration in the game."""
@@ -133,3 +135,14 @@ def stable_roommates(players):
         players = second_phase(players)
 
     return {player: player.matching for player in players}
+
+def matching_from_pref_dict(prefs):
+    return stable_roommates(players_from_pref_dict(prefs))
+
+test_preferences = {
+    1: [3, 4, 2, 6, 5], 
+    2: [6, 5, 4, 1, 3], 
+    3: [2, 4, 5, 1, 6], 
+    4: [5, 2, 3, 6, 1], 
+    5: [3, 1, 2, 4, 6], 
+    6: [5, 1, 3, 4, 2]}
