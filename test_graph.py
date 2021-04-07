@@ -4,10 +4,7 @@ from preference_graph import PreferenceGraph
 
 class TestGraph(Scene):
     def construct(self):
-        a = "a"
-        b = "b"
-        c = "c"
-        d = "d"
+        a, b, c, d = "a", "b", "c", "d"
         preferences = {
             a : [b, c, d],
             b : [c, d, a],
