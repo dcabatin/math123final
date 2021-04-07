@@ -1,7 +1,6 @@
 from manim import *
 
 
-
 class PreferenceGraph:
     
     def __init__(self, prefs, center = (0, 0), scale = 1):
