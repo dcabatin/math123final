@@ -30,7 +30,7 @@ class Player:
 
     def __repr__(self):
 
-        return "Player "+str(self.name)
+        return str(self.name)
 
     def _forget(self, other):
         """Forget another player by removing them from the player's preference
