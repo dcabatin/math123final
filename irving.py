@@ -1,4 +1,5 @@
 class IrvingSolver():
+    
     test_preferences = {
         1: [3, 4, 2, 6, 5], 
         2: [6, 5, 4, 1, 3], 
@@ -6,6 +7,7 @@ class IrvingSolver():
         4: [5, 2, 3, 6, 1], 
         5: [3, 1, 2, 4, 6], 
         6: [5, 1, 3, 4, 2]}
+
     def __init__(self, preferences=test_preferences):
         self.players = sorted(preferences.keys())
         self.n = len(self.players)
