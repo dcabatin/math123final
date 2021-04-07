@@ -1,149 +1,163 @@
-from player import *
+class IrvingSolver():
+    
+    test_preferences = {
+        1: [3, 4, 2, 6, 5], 
+        2: [6, 5, 4, 1, 3], 
+        3: [2, 4, 5, 1, 6], 
+        4: [5, 2, 3, 6, 1], 
+        5: [3, 1, 2, 4, 6], 
+        6: [5, 1, 3, 4, 2]}
 
-def _delete_pair(player, other):
-    """Make a player forget another (and vice versa), deleting the pair from
-    further consideration in the game."""
+    def __init__(self, preferences=test_preferences):
+        self.players = sorted(preferences.keys())
+        self.n = len(self.players)
+        self.preferences = preferences
+        self.rank = self.get_ranking_matrix()
 
-    player._forget(other)
-    other._forget(player)
+    def get_ranking_matrix(self):
+        rank = {p : { q: None for q in self.preferences[p]} for p in self.players}
 
-
-def first_phase(players):
-    """Conduct the first phase of the algorithm where one-way proposals are
-    made, and unpreferable pairs are forgotten."""
-
-    free_players = players[:]
-    while free_players:
-
-        player = free_players.pop()
+        for p in self.players:
+            for j in range(len(self.preferences[p])):
+                idx = self.preferences[p][j]
+                rank[p][idx] = j
         
-        favourite = player.get_favourite()
+        return rank
 
-        current = favourite.matching
-        if current is not None:
-            favourite._unmatch()
-            free_players.append(current)
+    def match_roommates(self):
+        first, last = self.stable_roommates_phase_1()
+        self.stable_roommates_phase_2(first, last)
+        self.clean_preferences(first, last)
 
-        favourite._match(player)
+        matches = []
+        visited = set()
+        i = 0
+        
+        for p in self.players:
+            if not p in visited:
+                pair = (p, self.preferences[p][last[p]])
+                visited.add(self.preferences[p][last[p]])
+                visited.add(p)
+                matches.append(pair)
+        
+        return matches
 
-        for successor in favourite.get_successors():
-            _delete_pair(successor, favourite)
-            if not successor.prefs and successor in free_players:
-                free_players.remove(successor)
+    def stable_roommates_phase_1(self):
+        proposal = {p: None for p in self.players}
+        first = {p: 0 for p in self.players}
+        last = {p: len(self.preferences[p]) for p in self.players}
+        to_process = list(self.players)
+        
+        while len(to_process) > 0:
+            p = to_process[0]
+            
+            # update first pointer if necessary
+            while self.preferences[p][first[p]] == None:
+                first[p] += 1
+                
+            top_pick = self.preferences[p][first[p]]
+            
+            # top pick hasn't been proposed to yet, so they accept
+            if proposal[top_pick] == None:
+                proposal[top_pick] = p
+                
+                match_rank = self.preferences[top_pick].index(p)
+                
+                # all candidates worse than i are rejected, must remove top_pick from their preference list
+                for idx in range(match_rank+1, last[top_pick]):
+                    reject = self.preferences[top_pick][idx]
+                    self.preferences[reject][self.rank[reject][top_pick]] = None
+                
+                # update last pointer
+                last[top_pick] = match_rank
+                del to_process[0]
+                
+                continue
+            
+            curr_match_idx = self.rank[top_pick][proposal[top_pick]]
+            potential_match_idx = self.rank[top_pick][p]
+            
+            if curr_match_idx < potential_match_idx: # current matching is preferred, i is rejected
+                self.preferences[top_pick][potential_match_idx] = None
+                
+                first[p] += 1 # start at next spot
+                
+                continue
+            
+            else: # accept proposal, so old match has to return to their preference list again
+                self.preferences[top_pick][curr_match_idx] = None
+                
+                # old match is rejected by top_pick, must update their list
+                top_pick_idx = self.rank[proposal[top_pick]][top_pick]
+                self.preferences[proposal[top_pick]][top_pick_idx] = None
+                
+                del to_process[0]
+                # add old match to to_process
+                to_process.insert(0, proposal[top_pick])
+                
+                proposal[top_pick] = p
+                last[top_pick] = potential_match_idx
+        
+        return first, last
 
-    return players
+    def clean_preferences(self, first, last):
+        for p in self.players:
+            for j in range(len(self.preferences[p])):
+                if j < first[p] or j > last[p]:
+                    self.preferences[p][j] = None
 
+    def stable_roommates_phase_2(self, first, last):
+        while True:
+            p, q = None, None
+            # find first p_0 to get a rotation from
+            # preference list of p_0 must contain at least 2 elements
+            for p_0 in self.players:
+                if last[p_0] - first[p_0] > 0 and self.find_second_favorite(p_0, first, last) != None:
+                    p, q = self.find_rotation(0, [p_0], [None], first, last)
+                    break
+            
+            if not p and not q:
+                return
+            
+            # eliminate rotation
+            self.eliminate_rotation(p, q, first, last)
 
-def locate_all_or_nothing_cycle(player):
-    """Locate a cycle of (least-preferable, second-choice) pairs to be removed
-    from the game."""
+    def find_second_favorite(self, p, first, last):
+        count = 0
+        pref = self.preferences[p]
+        for j in range(first[p], last[p]+1):
+            if not pref[j] == None:
+                count += 1
+            elif count == 0:
+                first[p] += 1
+            if count == 2:
+                return pref[j]
+        return None
 
-    lasts = [player]
-    seconds = []
-    while True:
-        second_best = player.prefs[1]
-        their_worst = second_best.prefs[-1]
+    def find_rotation(self, i, p, q, first, last):
+        second_favorite = self.find_second_favorite(p[i], first, last)
+        next_p = self.preferences[second_favorite][last[second_favorite]]
+        
+        if next_p in p:
+            # rotation found!
+            j = p.index(next_p)
+            q[j] = second_favorite
+                    
+            return p[j:], q[j:]
 
-        seconds.append(second_best)
-        lasts.append(their_worst)
+        q.append(second_favorite)
+        p.append(next_p)
+        return self.find_rotation(i+1, p, q, first, last)
 
-        player = their_worst
-
-        if lasts.count(player) > 1:
-            break
-
-    idx = lasts.index(player)
-    cycle = list(zip(lasts[idx + 1 :], seconds[idx:]))
-
-    return cycle
-
-
-def get_pairs_to_delete(cycle):
-    """Based on an all-or-nothing cycle :math:`(x_1, y_1), \\ldots, (x_n, y_n)`,
-    for each :math:`i = 1, \\ldots, n`, one must delete from the game all pairs
-    :math:`(y_i, z)` such that :math:`y_i` prefers :math:`x_{i-1}` to :math:`z`
-    where subscripts are taken modulo :math:`n`.
-    This is an important point that is omitted from the original paper, but may
-    be found in :cite:`GI89` (Section 4.2.3).
-    The essential difference between this statement and that in :cite:`Irv85` is
-    the removal of unpreferable pairs, identified using an all-or-nothing cycle,
-    in addition to those contained in the cycle. Without doing so, tails of
-    cycles can be removed rather than whole cycles, leaving some conflicting
-    pairs in the game."""
-
-    pairs = []
-    for i, (_, right) in enumerate(cycle):
-
-        left = cycle[(i - 1) % len(cycle)][0]
-        successors = right.prefs[right.prefs.index(left) + 1 :]
-        for successor in successors:
-            pair = (right, successor)
-            if pair not in pairs and pair[::-1] not in pairs:
-                pairs.append((right, successor))
-
-    return pairs
-
-
-def second_phase(players):
-    """Conduct the second phase of the algorithm where all-or-nothing cycles
-    (rotations) are located and removed from the game."""
-
-    player = next(p for p in players if len(p.prefs) > 1)
-    while True:
-
-        cycle = locate_all_or_nothing_cycle(player)
-        pairs = get_pairs_to_delete(cycle)
-        for player, other in pairs:
-            _delete_pair(player, other)
-
-        if any(p.prefs == [] for p in players):
-            print("no stable match.")
-            break
-
-        try:
-            player = next(p for p in players if len(p.prefs) > 1)
-        except StopIteration:
-            break
-
-    for player in players:
-        player._unmatch()
-        if player.prefs:
-            player._match(player.get_favourite())
-
-    return players
-
-
-def stable_roommates(players):
-    """Irving's algorithm :cite:`Irv85` that finds stable solutions to
-    instances of SR if one exists. Otherwise, an incomplete matching is found.
-    Parameters
-    ----------
-    players : list of Player
-        The players in the game. Each must rank all other players.
-    Returns
-    -------
-    matching : dict
-        A dictionary of matches where the keys and values are given by the
-        members of ``players``.
-    """
-
-    players = first_phase(players)
-
-    if any(p.prefs == [] for p in players):
-        print("No stable match.")
-
-    if any(len(p.prefs) > 1 for p in players):
-        players = second_phase(players)
-
-    return {player: player.matching for player in players}
-
-def matching_from_pref_dict(prefs):
-    return stable_roommates(players_from_pref_dict(prefs))
-
-test_preferences = {
-    1: [3, 4, 2, 6, 5], 
-    2: [6, 5, 4, 1, 3], 
-    3: [2, 4, 5, 1, 6], 
-    4: [5, 2, 3, 6, 1], 
-    5: [3, 1, 2, 4, 6], 
-    6: [5, 1, 3, 4, 2]}
+    def eliminate_rotation(self, p, q, first, last):
+        for i in range(len(p)):
+            # q_i rejects p_i so that p_i proposes to q_i+1
+            self.preferences[p[i]][self.rank[p[i]][q[i]]] = None
+            
+            # all successors of p_i-1 are removed from q_i's list, and q_i is removed from their lists
+            for j in range(self.rank[q[i]][p[i-1]]+1, last[q[i]]):
+                reject = list(self.rank[q[i]].keys())[list(self.rank[q[i]].values()).index(j)]
+                #reject = self.rank[q[i]].index(j) #preferences[q[i]][j]
+                self.preferences[reject][self.rank[reject][q[i]]] = None
+                
+            last[q[i]] = self.rank[q[i]][p[i-1]]
