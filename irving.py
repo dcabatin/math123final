@@ -16,6 +16,7 @@ def first_phase(players):
     while free_players:
 
         player = free_players.pop()
+        
         favourite = player.get_favourite()
 
         current = favourite.matching
