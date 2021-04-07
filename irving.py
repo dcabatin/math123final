@@ -1,5 +1,13 @@
 class IrvingSolver():
-    
+
+    char_test_preferences = {
+        'a': ['c', 'd', 'b', 'f', 'e'], 
+        'b': ['f', 'e', 'd', 'a', 'c'], 
+        'c': ['b', 'd', 'e', 'a', 'f'], 
+        'd': ['e', 'b', 'c', 'f', 'a'], 
+        'e': ['c', 'a', 'b', 'd', 'f'], 
+        'f': ['e', 'a', 'c', 'd', 'b']}
+
     test_preferences = {
         1: [3, 4, 2, 6, 5], 
         2: [6, 5, 4, 1, 3], 
@@ -56,6 +64,7 @@ class IrvingSolver():
                 first[p] += 1
                 
             top_pick = self.preferences[p][first[p]]
+            # print(p + " proposes to " + top_pick)
             
             # top pick hasn't been proposed to yet, so they accept
             if proposal[top_pick] == None:
@@ -66,7 +75,8 @@ class IrvingSolver():
                 # all candidates worse than i are rejected, must remove top_pick from their preference list
                 for idx in range(match_rank+1, last[top_pick]):
                     reject = self.preferences[top_pick][idx]
-                    self.preferences[reject][self.rank[reject][top_pick]] = None
+                    if reject is not None:
+                        self.preferences[reject][self.rank[reject][top_pick]] = None
                 
                 # update last pointer
                 last[top_pick] = match_rank
@@ -150,6 +160,7 @@ class IrvingSolver():
         return self.find_rotation(i+1, p, q, first, last)
 
     def eliminate_rotation(self, p, q, first, last):
+        print("eliminating rotation " + str(p))
         for i in range(len(p)):
             # q_i rejects p_i so that p_i proposes to q_i+1
             self.preferences[p[i]][self.rank[p[i]][q[i]]] = None
