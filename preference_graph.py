@@ -24,7 +24,7 @@ def reject_arrow(arrow):
 
 class PreferenceGraph:
     
-    def __init__(self, preferencess, center = (0, 0), scale = 1):
+    def __init__(self, preferences, center = (0, 0), scale = 1):
         self.prefs = preferences
         self.vertices = sorted(self.prefs.keys())
         self.graph = None
