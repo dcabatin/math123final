@@ -93,12 +93,14 @@ class PreferenceTable():
     
     def reject_proposal(self, sender, receiver):
         receiver_mob = self.pref_mobs[sender][receiver]
-        circle = self.proposals[sender]
+        
+        anims = [FadeToColor(receiver_mob, GREY_E)]
 
-        return [
-            Uncreate(circle),
-            FadeToColor(receiver_mob, GREY_E)
-        ]
+        if self.proposals.get(sender, None):
+            circle = self.proposals[sender]
+            anims.append(Uncreate(circle))
+        
+        return anims
         
 
     def create(self):

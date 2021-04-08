@@ -16,12 +16,9 @@ class TestTable(Scene):
         }
         t = PreferenceTable(preferences)
         self.play(*t.create())
-        self.wait()
         self.play(t.propose(b, d))
-        self.wait()
         self.play(*t.accept_proposal(b, d), run_time=0.3)
-        self.wait()
         self.play(*t.reject_proposal(b, d))
-        self.wait()
+        self.play(*t.reject_proposal(a, b))
         self.play(*t.uncreate())
         self.wait()
