@@ -36,8 +36,6 @@ class PreferenceTable():
         )
 
         self.lines = self.get_lines()
-        
-        self.all_mobjcets = self.lines + [self.matrix_mob]
 
         self.proposals = {}
         
@@ -107,3 +105,8 @@ class PreferenceTable():
         matrix_anim = ShowCreation(self.matrix_mob)
         line_anims = [ShowCreation(l) for l in self.lines]
         return [matrix_anim]+line_anims
+
+    def uncreate(self):
+        all_mobs = [self.matrix_mob] + self.lines + list(self.proposals.values())
+
+        return [Uncreate(m) for m in all_mobs]
