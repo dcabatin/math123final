@@ -4,10 +4,10 @@ from table import PreferenceTable
 
 class TestTable(Scene):
     def construct(self):
-        a = "a"
-        b = "b"
-        c = "c"
-        d = "d"
+        a = "A"
+        b = "B"
+        c = "C"
+        d = "D"
         preferences = {
             a : [b, c, d],
             b : [c, d, a],
@@ -16,4 +16,10 @@ class TestTable(Scene):
         }
         t = PreferenceTable(preferences)
         self.play(*t.create())
-        self.wait(5)
+        self.wait()
+        self.play(t.propose(b, d))
+        self.wait()
+        self.play(*t.accept_proposal(b, d), run_time=0.3)
+        self.wait()
+        self.play(*t.reject_proposal(b, d))
+        self.wait(2)
