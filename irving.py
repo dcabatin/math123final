@@ -32,7 +32,7 @@ class IrvingSolver():
         self.players = sorted(preferences.keys())
         self.n = len(self.players)
         self.preferences = preferences
-        self.rank = self.get_ranking_matrix()
+        self.rank = self.build_ranking_matrix()
         self.G = G
         self.T = T
         self.scene = scene
@@ -48,7 +48,6 @@ class IrvingSolver():
             q_potential_idx = self.rank[q][p]
             if p_curr_idx > p_potential_idx and q_curr_idx > q_potential_idx:
                 raise NoStableMatchingException("Failed to verify.")
-        return
 
     def check_unsolvable(self, first=None, last=None):
         for prefs in self.preferences.values():
@@ -59,7 +58,7 @@ class IrvingSolver():
                 if first[p] > last[p]:
                     raise NoStableMatchingException("Stable matching does not exist.")
 
-    def get_ranking_matrix(self):
+    def build_ranking_matrix(self):
         rank = {p : { q: None for q in self.preferences[p]} for p in self.players}
         for p in self.players:
             for i in range(len(self.preferences[p])):
@@ -113,7 +112,8 @@ class IrvingSolver():
             anims += getattr(self.G, action)(p, q)
         if self.T:
             anims += getattr(self.T, action)(p, q)
-        self.scene.play(*anims)
+        if self.scene:
+            self.scene.play(*anims)
 
     def propose(self, p, q):
         self.play_animation(p, q, "propose")
