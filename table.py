@@ -35,9 +35,14 @@ class PreferenceTable():
             right_bracket="|"
         )
 
-        self.lines = self.make_lines()
+        self.proposals = {
+            player : {
+                k : None for k in self.prefs[player]
+            }
+            for player in self.order
+        }
 
-        self.proposals = {}
+        self.lines = self.make_lines()
 
         vgroup = self.get_all_mobjs(group=True)
 
@@ -45,7 +50,6 @@ class PreferenceTable():
             vgroup.move_to(np.array(center))
         if scale:
             vgroup.scale(scale)
-
 
 
         
@@ -105,7 +109,7 @@ class PreferenceTable():
         circle = self.proposals[sender]
         undashed = Circle(color=GREEN).surround(receiver_mob, buffer_factor=1)
         undashed.stroke_width = DEFAULT_STROKE_WIDTH*1.7
-        self.proposals[sender] = undashed
+        self.proposals[sender][receiver] = undashed
         return [
             ReplacementTransform(circle, undashed),
             FadeToColor(receiver_mob, GREEN)
@@ -116,8 +120,8 @@ class PreferenceTable():
         
         anims = [FadeToColor(receiver_mob, GREY_E)]
 
-        if self.proposals.get(sender, None):
-            circle = self.proposals[sender]
+        if self.proposals[sender][receiver]:
+            circle = self.proposals[sender][receiver]
             anims.append(Uncreate(circle))
         
         return anims

@@ -11,4 +11,5 @@ class TestTable(Scene):
         T = PreferenceTable(preferences, scale = 1)
         S = IrvingSolver(preferences=preferences, T=T, scene=self)
         self.play(*T.create())
-        S.match_roommates()
+        self.play(*T.propose())
+        # S.match_roommates()
