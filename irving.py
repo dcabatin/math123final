@@ -28,12 +28,13 @@ class NoStableMatchingException(Exception):
         self.msg = msg
 
 class IrvingSolver():
-    def __init__(self, preferences=unsat_preferences, G=None, scene=None, verbose=False):
+    def __init__(self, preferences=unsat_preferences, G=None, T=None, scene=None, verbose=False):
         self.players = sorted(preferences.keys())
         self.n = len(self.players)
         self.preferences = preferences
         self.rank = self.get_ranking_matrix()
         self.G = G
+        self.T = T
         self.scene = scene
         self.verbose = verbose
 
@@ -107,18 +108,27 @@ class IrvingSolver():
         return self.get_nth_favorite(p,1)
 
     def propose(self, p, q):
-        if self.scene:
+        if self.G:
             self.scene.play(*self.G.propose(p, q))
+        if self.T:
+            self.scene.play(self.T.propose(p, q))
 
     def reject(self, p, q):
-        if self.scene:
+        if self.G:
             self.scene.play(*self.G.reject_proposal(p, q))
+        if self.T:
+            self.scene.play(*self.T.reject_proposal(p, q))
     
     def accept(self, p, q):
-        if self.scene:
+        if self.G:
             self.scene.play(*self.G.accept_proposal(p, q))
+        if self.T:
+            self.scene.play(*self.T.accept_proposal(p, q))
+
 
     def symmetric_reject(self, p, q):
+        if self.T:
+            self.scene.play(*(self.T.reject_proposal(p, q) + self.T.reject_proposal(q,p)))
         self.preferences[p][self.rank[p][q]] = None
         self.preferences[q][self.rank[q][p]] = None
 
@@ -252,7 +262,6 @@ class IrvingSolver():
     def eliminate_rotation(self, p, q, first, last):
         for i in range(len(p)):
             # q_i rejects p_i so that p_i proposes to q_i+1
-            self.preferences[p[i]][self.rank[p[i]][q[i]]] = None
             self.symmetric_reject(p[i], q[i])
             
             # all successors of p_i-1 are removed from q_i's list, and q_i is removed from their lists
