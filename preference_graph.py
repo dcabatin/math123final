@@ -19,6 +19,7 @@ def accept_arrow(arrow):
 
 def reject_arrow(arrow):
     arrow.set_stroke_width(7)
+    arrow.tip.set_width(0.25)
     arrow.set_color(REJECTED_COLOR)
 
 class PreferenceGraph:
@@ -67,8 +68,8 @@ class PreferenceGraph:
         return [Create(self.proposals[sender][receiver][1])]
 
     def reject_proposal(self, sender, receiver):
-        assert self.proposals[sender][receiver][0] == SENT, \
-               "proposal either not sent or already rejected/accepted"
+        assert self.proposals[sender][receiver][0] == SENT or self.proposals[sender][receiver][0] == ACCEPTED, \
+               "proposal either not sent or already rejected"
         
         arrow = self.proposals[sender][receiver][1]
         new_arrow = arrow.copy()

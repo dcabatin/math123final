@@ -28,13 +28,14 @@ class NoStableMatchingException(Exception):
         self.msg = msg
 
 class IrvingSolver():
-    def __init__(self, G, scene, preferences=unsat_preferences):
+    def __init__(self, preferences=unsat_preferences, G=None, scene=None, verbose=False):
         self.players = sorted(preferences.keys())
         self.n = len(self.players)
         self.preferences = preferences
         self.rank = self.get_ranking_matrix()
         self.G = G
         self.scene = scene
+        self.verbose = verbose
 
     def verify_solution(self, last):
         for p,q in combinations(self.players, 2):
@@ -86,7 +87,8 @@ class IrvingSolver():
             return matches
 
         except NoStableMatchingException as e:
-            print(e.msg)
+            if self.verbose:
+                print(e.msg)
             return None
 
     def get_nth_favorite(self, p, n):
@@ -104,6 +106,17 @@ class IrvingSolver():
     def second(self, p):
         return self.get_nth_favorite(p,1)
 
+    def propose(self, p, q):
+        if self.scene:
+            self.scene.play(*self.G.propose(p, q))
+
+    def reject(self, p, q):
+        if self.scene:
+            self.scene.play(*self.G.reject_proposal(p, q))
+    
+    def accept(self, p, q):
+        if self.scene:
+            self.scene.play(*self.G.accept_proposal(p, q))
 
     def symmetric_reject(self, p, q):
         self.preferences[p][self.rank[p][q]] = None
@@ -120,16 +133,16 @@ class IrvingSolver():
             p = to_process[-1]
             
             # determine who p should propose to
-            # print(self.preferences[p], " ", first[p], " ", last[p])
             while self.preferences[p][first[p]] is None:
                 first[p] += 1
                 
             top_pick = self.preferences[p][first[p]]
-            self.scene.play(*self.G.propose(p, top_pick))
+
+            self.propose(p,top_pick)
             
             # top pick hasn't been proposed to yet, so they accept
             if accepted_proposal[top_pick] is None:
-                self.scene.play(*self.G.accept_proposal(p, top_pick))
+                self.accept(p, top_pick)
                 accepted_proposal[top_pick] = p
                 
                 match_rank = self.rank[top_pick][p]
@@ -152,7 +165,8 @@ class IrvingSolver():
 
             # current matching is preferred, i is rejected
             if curr_match_idx < potential_match_idx:
-                self.scene.play(*self.G.reject_proposal(p, top_pick))
+                self.reject(p, top_pick)
+
                 self.preferences[top_pick][potential_match_idx] = None
                 
                 first[p] += 1 # start at next spot
@@ -163,8 +177,8 @@ class IrvingSolver():
             else: 
                 self.preferences[top_pick][curr_match_idx] = None
 
-                self.scene.play(*self.G.reject_proposal(top_pick, accepted_proposal[top_pick]))
-                self.scene.play(*self.G.accept_proposal(p, top_pick))
+                self.reject(accepted_proposal[top_pick], top_pick)
+                self.accept(p, top_pick)
                 
                 # old match is rejected by top_pick, must update their list
                 # top_pick_idx = self.rank[accepted_proposal[top_pick]][top_pick]

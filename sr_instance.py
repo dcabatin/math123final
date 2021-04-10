@@ -24,12 +24,15 @@ def test():
         return False, "Bad: matching on instance with no matching!" 
     return True, "Good: matching on instance with matching."
 
-tests = []
+def runtest(n):
+    tests = []
+    for _ in range(n):
+        r, msg = test()
+        if not r:
+            print(msg)
+        tests.append(r)
 
-for _ in range(10000):
-    r, msg = test()
-    if not r:
-        print(msg)
-    tests.append(r)
+    print("All tests passed!" if all(tests) else "Tests failed.")
 
-print(all(tests))
+if __name__ == "__main__":
+    runtest(1000)

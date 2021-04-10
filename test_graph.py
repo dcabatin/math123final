@@ -1,24 +1,14 @@
 from manim import *
+from irving import *
+from sr_instance import generate_sr_instance
 
 from preference_graph import PreferenceGraph
 
 class TestGraph(Scene):
-    def construct(self):
-        a, b, c, d = "a", "b", "c", "d"
-        preferences = {
-            a : [b, c, d],
-            b : [c, d, a],
-            c : [a, b, d],
-            d : [a, b, c]
-        }
-        g = PreferenceGraph(preferences, scale = 2)
+    def construct(self, preferences=None):
+        if not preferences:
+            preferences = generate_sr_instance(['a', 'b', 'c', 'd', 'e', 'f'])
+        g = PreferenceGraph(preferences, scale = 1)
+        S = IrvingSolver(preferences=preferences, G=g, scene=self)
         self.play(*g.create())
-        self.play(*g.propose(a, b))
-        self.play(*g.propose(a, c))
-        self.play(*g.propose(a, d))
-        self.wait(1)
-        self.play(*g.accept_proposal(a, b))
-        self.play(*g.reject_proposal(a, d))
-        self.wait(1)
-        self.play(*g.uncreate())
-        self.wait(1)
+        S.match_roommates()
