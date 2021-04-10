@@ -14,10 +14,10 @@ class PreferenceTable():
         self.scale = scale
 
         self.order = sorted(prefs.keys())
-        self.key_mobs = {k : Text(k) for k in self.order}
+        self.key_mobs = {k : Text(str(k)) for k in self.order}
         self.pref_mobs = {
             player : {
-                k : Text(k) for k in self.prefs[player]
+                k : Text(str(k)) for k in self.prefs[player]
             }
             for player in self.order
         }
@@ -93,7 +93,11 @@ class PreferenceTable():
         circle = DashedVMobject(circle)
         self.proposals[sender] = circle
 
+<<<<<<< Updated upstream
         return [ShowCreation(circle)]
+=======
+        return Create(circle)
+>>>>>>> Stashed changes
 
     def accept_proposal(self, sender, receiver):
         receiver_mob = self.pref_mobs[sender][receiver]
@@ -119,8 +123,8 @@ class PreferenceTable():
 
 
     def create(self):
-        matrix_anim = ShowCreation(self.matrix_mob)
-        line_anims = [ShowCreation(l) for l in self.lines]
+        matrix_anim = Create(self.matrix_mob)
+        line_anims = [Create(l) for l in self.lines]
         return [matrix_anim]+line_anims
 
 
