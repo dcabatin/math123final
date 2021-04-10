@@ -39,9 +39,13 @@ class PreferenceTable():
 
         self.proposals = {}
 
+        vgroup = self.get_all_mobjs(group=True)
+
         if center:
-            vgroup = self.get_all_mobjs(group=True)
             vgroup.move_to(np.array(center))
+        if scale:
+            vgroup.scale(scale)
+
 
 
         
