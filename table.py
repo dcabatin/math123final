@@ -93,7 +93,7 @@ class PreferenceTable():
         circle = DashedVMobject(circle)
         self.proposals[sender] = circle
 
-        return [ShowCreation(circle)]
+        return [Create(circle)]
 
     def accept_proposal(self, sender, receiver):
         receiver_mob = self.pref_mobs[sender][receiver]
@@ -119,8 +119,8 @@ class PreferenceTable():
 
 
     def create(self):
-        matrix_anim = ShowCreation(self.matrix_mob)
-        line_anims = [ShowCreation(l) for l in self.lines]
+        matrix_anim = Create(self.matrix_mob)
+        line_anims = [Create(l) for l in self.lines]
         return [matrix_anim]+line_anims
 
 
