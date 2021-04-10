@@ -29,18 +29,9 @@ class PreferenceTable():
             for j, pref in enumerate(self.prefs[player]):
                 self.mob_matrix[i][j+1] = self.pref_mobs[player][pref]
 
-        self.matrix_mob = BracketlessMatrix(
-            self.mob_matrix,
-            left_bracket="|",
-            right_bracket="|"
-        )
+        self.matrix_mob = BracketlessMatrix(self.mob_matrix)
 
-        self.proposals = {
-            player : {
-                k : None for k in self.prefs[player]
-            }
-            for player in self.order
-        }
+        self.proposals = {player : {} for player in self.order}
 
         self.lines = self.make_lines()
 
@@ -88,8 +79,8 @@ class PreferenceTable():
     def get_all_mobjs(self, group=False):
         mat = [self.matrix_mob]
         lines = self.lines
-        circles = list(self.proposals.values())
-
+        circles = sum([list(p.values()) for p in self.proposals.values()], [])
+        
         all_mobjs = mat + lines + circles
 
         return VGroup(*all_mobjs) if group else all_mobjs
@@ -99,14 +90,14 @@ class PreferenceTable():
         circle = Circle(color=WHITE, ).surround(receiver_mob, buffer_factor=1)
         circle.stroke_width = DEFAULT_STROKE_WIDTH*1.7
         circle = DashedVMobject(circle)
-        self.proposals[sender] = circle
+        self.proposals[sender][receiver] = circle
 
         return [Create(circle)]
 
 
     def accept_proposal(self, sender, receiver):
         receiver_mob = self.pref_mobs[sender][receiver]
-        circle = self.proposals[sender]
+        circle = self.proposals[sender][receiver]
         undashed = Circle(color=GREEN).surround(receiver_mob, buffer_factor=1)
         undashed.stroke_width = DEFAULT_STROKE_WIDTH*1.7
         self.proposals[sender][receiver] = undashed
@@ -120,8 +111,9 @@ class PreferenceTable():
         
         anims = [FadeToColor(receiver_mob, GREY_E)]
 
-        if self.proposals[sender][receiver]:
-            circle = self.proposals[sender][receiver]
+        circle = self.proposals[sender].get(receiver, None)
+
+        if circle:
             anims.append(Uncreate(circle))
         
         return anims
@@ -140,6 +132,6 @@ class PreferenceTable():
 
 
     def uncreate(self):
-        all_mobs = [self.matrix_mob] + self.lines + list(self.proposals.values())
+        all_mobjs = self.get_all_mobjs(group=False)
 
-        return [Uncreate(m) for m in all_mobs]
+        return [Uncreate(m) for m in all_mobjs]
