@@ -93,11 +93,7 @@ class PreferenceTable():
         circle = DashedVMobject(circle)
         self.proposals[sender] = circle
 
-<<<<<<< Updated upstream
-        return [ShowCreation(circle)]
-=======
-        return Create(circle)
->>>>>>> Stashed changes
+        return [Create(circle)]
 
     def accept_proposal(self, sender, receiver):
         receiver_mob = self.pref_mobs[sender][receiver]

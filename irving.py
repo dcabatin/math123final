@@ -108,27 +108,33 @@ class IrvingSolver():
         return self.get_nth_favorite(p,1)
 
     def propose(self, p, q):
+        anims = []
         if self.G:
-            self.scene.play(*self.G.propose(p, q))
+            anims += self.G.propose(p, q)
         if self.T:
-            self.scene.play(self.T.propose(p, q))
+            anims.append(self.T.propose(p, q))
+        self.scene.play(*anims)
 
     def reject(self, p, q):
+        anims = []
         if self.G:
-            self.scene.play(*self.G.reject_proposal(p, q))
+            anims += self.G.reject_proposal(p, q)
         if self.T:
-            self.scene.play(*self.T.reject_proposal(p, q))
+            anims += self.T.reject_proposal(p, q)
+        self.scene.play(*anims)
     
     def accept(self, p, q):
+        anims = []
         if self.G:
-            self.scene.play(*self.G.accept_proposal(p, q))
+            anims += self.G.accept_proposal(p, q)
         if self.T:
-            self.scene.play(*self.T.accept_proposal(p, q))
-
+            anims += self.T.accept_proposal(p, q)
+        self.scene.play(*anims)
 
     def symmetric_reject(self, p, q):
         if self.T:
-            self.scene.play(*(self.T.reject_proposal(p, q) + self.T.reject_proposal(q,p)))
+            self.scene.play(*self.T.reject_proposal(p, q))
+            self.scene.play(*self.T.reject_proposal(q, p))
         self.preferences[p][self.rank[p][q]] = None
         self.preferences[q][self.rank[q][p]] = None
 
