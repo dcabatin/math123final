@@ -68,7 +68,7 @@ class PreferenceGraph:
         return [Create(self.proposals[sender][receiver][1])]
 
     def reject_proposal(self, sender, receiver):
-        assert self.proposals[sender][receiver][0] == SENT or self.proposals[sender][receiver][0] == ACCEPTED, \
+        assert self.proposals[sender][receiver][0] in {SENT, ACCEPTED}, \
                "proposal either not sent or already rejected"
         
         arrow = self.proposals[sender][receiver][1]

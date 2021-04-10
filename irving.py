@@ -107,29 +107,22 @@ class IrvingSolver():
     def second(self, p):
         return self.get_nth_favorite(p,1)
 
-    def propose(self, p, q):
+    def play_animation(self, p, q, action):
         anims = []
         if self.G:
-            anims += self.G.propose(p, q)
+            anims += getattr(self.G, action)(p, q)
         if self.T:
-            anims.append(self.T.propose(p, q))
+            anims += getattr(self.T, action)(p, q)
         self.scene.play(*anims)
 
+    def propose(self, p, q):
+        self.play_animation(p, q, "propose")
+        
     def reject(self, p, q):
-        anims = []
-        if self.G:
-            anims += self.G.reject_proposal(p, q)
-        if self.T:
-            anims += self.T.reject_proposal(p, q)
-        self.scene.play(*anims)
+        self.play_animation(p, q, "reject_proposal")
     
     def accept(self, p, q):
-        anims = []
-        if self.G:
-            anims += self.G.accept_proposal(p, q)
-        if self.T:
-            anims += self.T.accept_proposal(p, q)
-        self.scene.play(*anims)
+        self.play_animation(p, q, "accept_proposal")
 
     def symmetric_reject(self, p, q):
         if self.T:
@@ -138,11 +131,16 @@ class IrvingSolver():
         self.preferences[p][self.rank[p][q]] = None
         self.preferences[q][self.rank[q][p]] = None
 
+    def one_way_reject(self, p, q):
+        if self.T:
+            self.scene.play(*self.T.reject_proposal(p,q))
+        self.preferences[p][self.rank[p]] = None
+
     def stable_roommates_phase_1(self):
         accepted_proposal = {p: None for p in self.players}
         first = {p: 0 for p in self.players}
         last = {p: len(self.preferences[p]) for p in self.players}
-        to_process = list(self.players)
+        to_process = list(reversed(self.players))
         
         while to_process:
             self.check_unsolvable()
