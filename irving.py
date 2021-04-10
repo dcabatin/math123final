@@ -134,7 +134,7 @@ class IrvingSolver():
     def one_way_reject(self, p, q):
         if self.T:
             self.scene.play(*self.T.reject_proposal(p,q))
-        self.preferences[p][self.rank[p]]
+        self.preferences[p][self.rank[p]] = None
 
     def stable_roommates_phase_1(self):
         accepted_proposal = {p: None for p in self.players}
