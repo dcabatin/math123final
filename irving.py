@@ -71,7 +71,6 @@ class IrvingSolver():
     def match_roommates(self):
         try:
             first, last = self.stable_roommates_phase_1()
-            return
             self.stable_roommates_phase_2(first, last)
             self.clean_preferences(first, last)
             self.verify_solution(last)
@@ -135,13 +134,13 @@ class IrvingSolver():
     def one_way_reject(self, p, q):
         if self.T:
             self.scene.play(*self.T.reject_proposal(p,q))
-        self.preferences[p][self.rank[p][q]] = None
+        self.preferences[p][self.rank[p]]
 
     def stable_roommates_phase_1(self):
         accepted_proposal = {p: None for p in self.players}
         first = {p: 0 for p in self.players}
         last = {p: len(self.preferences[p]) for p in self.players}
-        to_process = list(self.players)
+        to_process = list(reversed(self.players))
         
         while to_process:
             self.check_unsolvable()
@@ -163,10 +162,10 @@ class IrvingSolver():
                 match_rank = self.rank[top_pick][p]
                 
                 # all candidates worse than i are rejected, must remove top_pick from their preference list
-                # for idx in range(match_rank+1, last[top_pick]):
-                #     reject = self.preferences[top_pick][idx]
-                #     if reject is not None:
-                #         self.symmetric_reject(top_pick, reject)
+                for idx in range(match_rank+1, last[top_pick]):
+                    reject = self.preferences[top_pick][idx]
+                    if reject is not None:
+                        self.symmetric_reject(top_pick, reject)
                 
                 # update last pointer
                 last[top_pick] = match_rank
@@ -198,11 +197,11 @@ class IrvingSolver():
                 # old match is rejected by top_pick, must update their list
                 # top_pick_idx = self.rank[accepted_proposal[top_pick]][top_pick]
                 # self.preferences[accepted_proposal[top_pick]][top_pick_idx] = None
-                # self.reject(top_pick, accepted_proposal[top_pick])
-                # for idx in range(potential_match_idx+1, last[top_pick]):
-                #     reject = self.preferences[top_pick][idx]
-                #     if reject is not None:
-                #         self.symmetric_reject(top_pick, reject)
+                self.symmetric_reject(top_pick, accepted_proposal[top_pick])
+                for idx in range(potential_match_idx+1, last[top_pick]):
+                    reject = self.preferences[top_pick][idx]
+                    if reject is not None:
+                        self.symmetric_reject(top_pick, reject)
                 
                 to_process.pop()
                 # add old match to to_process
