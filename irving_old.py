@@ -97,8 +97,7 @@ def second_phase(players):
             _delete_pair(player, other)
 
         if any(p.prefs == [] for p in players):
-            print("no stable match.")
-            break
+            raise Exception()
 
         try:
             player = next(p for p in players if len(p.prefs) > 1)
@@ -127,13 +126,16 @@ def stable_roommates(players):
         members of ``players``.
     """
 
-    players = first_phase(players)
+    try:
+        players = first_phase(players)
 
-    if any(p.prefs == [] for p in players):
-        print("No stable match.")
+        if any(p.prefs == [] for p in players):
+            raise Exception()
 
-    if any(len(p.prefs) > 1 for p in players):
-        players = second_phase(players)
+        if any(len(p.prefs) > 1 for p in players):
+            players = second_phase(players)
+    except Exception:
+        return None
 
     return {player: player.matching for player in players}
 
