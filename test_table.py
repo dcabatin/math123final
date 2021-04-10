@@ -14,9 +14,9 @@ class TestTable(Scene):
             c : [a, b, d],
             d : [a, b, c]
         }
-        t = PreferenceTable(preferences)
+        t = PreferenceTable(preferences, center=[1,1,0])
         self.play(*t.create())
-        self.play(t.propose(b, d))
+        self.play(*t.propose(b, d))
         self.play(*t.accept_proposal(b, d), run_time=0.3)
         self.play(*t.reject_proposal(b, d))
         self.play(*t.reject_proposal(a, b))

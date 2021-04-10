@@ -1,6 +1,6 @@
 from manim import *
 
-class PetarMatrix(MobjectMatrix):
+class BracketlessMatrix(MobjectMatrix):
     """Matrix with no brackets"""
     def add_brackets(self, left="\\big[", right="\\big]"):
         pass
@@ -29,17 +29,23 @@ class PreferenceTable():
             for j, pref in enumerate(self.prefs[player]):
                 self.mob_matrix[i][j+1] = self.pref_mobs[player][pref]
 
-        self.matrix_mob = PetarMatrix(
+        self.matrix_mob = BracketlessMatrix(
             self.mob_matrix,
             left_bracket="|",
             right_bracket="|"
         )
 
-        self.lines = self.get_lines()
+        self.lines = self.make_lines()
 
         self.proposals = {}
+
+        if center:
+            vgroup = self.get_all_mobjs(group=True)
+            vgroup.move_to(np.array(center))
+
+
         
-    def get_lines(self):
+    def make_lines(self):
 
         lines = []
 
@@ -71,6 +77,15 @@ class PreferenceTable():
 
         return lines
 
+    def get_all_mobjs(self, group=False):
+        mat = [self.matrix_mob]
+        lines = self.lines
+        circles = list(self.proposals.values())
+
+        all_mobjs = mat + lines + circles
+
+        return VGroup(*all_mobjs) if group else all_mobjs
+
     def propose(self, sender, receiver):
         receiver_mob = self.pref_mobs[sender][receiver]
         circle = Circle(color=WHITE, ).surround(receiver_mob, buffer_factor=1)
@@ -78,7 +93,7 @@ class PreferenceTable():
         circle = DashedVMobject(circle)
         self.proposals[sender] = circle
 
-        return ShowCreation(circle)
+        return [ShowCreation(circle)]
 
     def accept_proposal(self, sender, receiver):
         receiver_mob = self.pref_mobs[sender][receiver]
@@ -101,12 +116,19 @@ class PreferenceTable():
             anims.append(Uncreate(circle))
         
         return anims
-        
+
 
     def create(self):
         matrix_anim = ShowCreation(self.matrix_mob)
         line_anims = [ShowCreation(l) for l in self.lines]
         return [matrix_anim]+line_anims
+
+
+    def move_anim(self, target):
+        all_mobjs = self.get_all_mobjs(group=True)
+        all_mobjs.target = np.array(target)
+        return [MoveToTarget(all_mobjs)]
+
 
     def uncreate(self):
         all_mobs = [self.matrix_mob] + self.lines + list(self.proposals.values())
