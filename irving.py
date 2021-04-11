@@ -98,7 +98,9 @@ class IrvingSolver():
                     matches.append(pair)
 
             if self.scene:
-                self.scene.play(*self.G.uncreate_not_accepted_arrows())
+                animations = self.G.uncreate_not_accepted_arrows()
+                if len(animations) > 0:
+                    self.scene.play(*animations)
             return matches
 
         except NoStableMatchingException as e:
