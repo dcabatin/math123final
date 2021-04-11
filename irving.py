@@ -129,6 +129,7 @@ class IrvingSolver():
 
     def symmetric_reject(self, p, q):
         if self.preferences[p][self.rank[p][q]] is not None:
+
             self.preferences[p][self.rank[p][q]] = None
             if self.scene and self.T:
                 self.scene.play(*self.T.reject_proposal(p, q))
@@ -199,8 +200,6 @@ class IrvingSolver():
             
             # accept accepted_proposal, so old match has to return to their preference list again
             else: 
-                self.preferences[top_pick][curr_match_idx] = None
-
                 self.one_way_reject(accepted_proposal[top_pick], top_pick)
                 self.accept(p, top_pick)
                 
@@ -225,10 +224,10 @@ class IrvingSolver():
 
     def between_phases(self, proposals):
         for q in self.players:
-            p = proposals[q] # p holds a proposal from p
+            p = proposals[q] # q holds a proposal from p
             proposal_idx = self.rank[q][p]
-            for i in range(proposal_idx+1, len(self.preferences[q])):
-                self.symmetric_reject(q, self.original_preferences[q][i])
+            for r in self.original_preferences[q][proposal_idx+1:]:
+                self.symmetric_reject(q, r)
                 
 
     def clean_preferences(self, first, last):
