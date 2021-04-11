@@ -6,7 +6,6 @@ python -m manim file.py ClassName -pql
 -p is preview  
 -q is quality, pick from {l, m, h, p, k}  
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/dcabatin/math123final/HEAD?filepath=irving_scene.ipynb)
+Click the button below to open a test environment in a Jupyter notebook! This will let you define your own example and generate an animation.
 
-.. image:: https://mybinder.org/badge_logo.svg
- :target: https://mybinder.org/v2/gh/dcabatin/math123final/HEAD?filepath=irving_scene.ipynb
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/dcabatin/math123final/HEAD?filepath=irving_scene.ipynb)
