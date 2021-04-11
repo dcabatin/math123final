@@ -78,7 +78,13 @@ class IrvingSolver():
             for p in self.players:
                 while self.preferences[p][last[p]] is None:
                     last[p] -= 1
-                    
+
+            if self.G:
+                animations = self.G.uncreate_not_accepted_arrows()
+                if len(animations) > 0:
+                    self.scene.play(*animations)
+                self.scene.wait(3)
+                        
             self.stable_roommates_phase_2(first, last)
             self.clean_preferences(first, last)
             self.verify_solution(last)
@@ -121,25 +127,27 @@ class IrvingSolver():
     def second(self, p):
         return self.get_nth_favorite(p,1)
 
-    def play_animation(self, action, *args, **kwargs):
+    def play_animation(self, action, *args, play=True, **kwargs):
         anims = []
         if self.G:
             anims += getattr(self.G, action)(*args, **kwargs)
         if self.T:
             anims += getattr(self.T, action)(*args, **kwargs)
+        if not play:
+            return anims
         if self.scene:
             self.scene.play(*anims)
 
-    def propose(self, p, q, **kwargs):
-        self.play_animation("propose", p, q, **kwargs)
+    def propose(self, p, q, play=True, **kwargs):
+        return self.play_animation("propose", p, q, play=play, **kwargs)
         
-    def reject(self, p, q):
-        self.play_animation("reject_proposal", p, q)
+    def reject(self, p, q, play=True):
+        return self.play_animation("reject_proposal", p, q, play=play)
     
-    def accept(self, p, q):
-        self.play_animation("accept_proposal", p, q)
+    def accept(self, p, q, play=True):
+        return self.play_animation("accept_proposal", p, q, play=play)
 
-    def symmetric_reject(self, p, q):
+    def symmetric_reject(self, p, q, play=True):
         anims = []
         if self.preferences[p][self.rank[p][q]] is not None:
             self.preferences[p][self.rank[p][q]] = None
@@ -149,6 +157,8 @@ class IrvingSolver():
             self.preferences[q][self.rank[q][p]] = None
             if self.scene and self.T:
                 anims += self.T.reject_proposal(q, p)
+        if not play:
+            return anims
         if self.scene and anims:
             self.scene.play(*anims)
 
@@ -256,18 +266,27 @@ class IrvingSolver():
         return self.find_rotation(i+1, p, q, first, last)
 
     def eliminate_rotation(self, p, q, first, last):
+        propose_anims = []
+        reject_anims = []
+        accept_anims = []
+        for i in range(len(p)):
+            reject_anims += self.reject(p[i], q[i], play=False)
+            if i > 0:
+                accept_anims += self.accept(p[i-1], q[i], play=False)
+            if i == len(p) - 1:
+                propose_anims += self.propose(p[i], q[0], play=False, will_be_accepted = True)
+                accept_anims += self.accept(p[i], q[0], play=False)
+            else:
+                propose_anims += self.propose(p[i], q[i+1], play=False, will_be_accepted = True)
+        if self.scene:
+            self.scene.play(*reject_anims)
+            self.scene.play(*propose_anims)
+            self.scene.play(*accept_anims)
+
         for i in range(len(p)):
             # q_i rejects p_i so that p_i proposes to q_i+1, then q_i+1 rejects p_i+1 so that ...
             # q_0 rejects p_0 so that p_0 proposes to q_1, then q_1 rejects p_1 and accepts p_0 so that p_1 proposes to q_2, ...
-            self.symmetric_reject(p[i], q[i])
-            self.reject(p[i], q[i])
-            if i > 0:
-                self.accept(p[i-1], q[i])
-            if i == len(p) - 1:
-                self.propose(p[i], q[0], will_be_accepted = True)
-                self.accept(p[i], q[0])
-            else:
-                self.propose(p[i], q[i+1], will_be_accepted = True)
+            self.symmetric_reject(p[i], q[i])                
             
             # all successors of p_i-1 are removed from q_i's list, and q_i is removed from their lists
             for j in range(self.rank[q[i]][p[i-1]]+1, last[q[i]]):
