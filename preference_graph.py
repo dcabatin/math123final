@@ -105,7 +105,7 @@ class PreferenceGraph:
             for u in self.vertices:
                 if not v == u:
                     proposal = self.proposals[v][u]
-                    if proposal[0] != ACCEPTED:
+                    if proposal and proposal[0] != ACCEPTED:
                         animations.append(Uncreate(proposal[1]))
                         self.proposals[v][u] = None
         return animations
