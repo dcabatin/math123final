@@ -1,7 +1,7 @@
 from manim import *
 
 PROPOSAL_COLOR = 'white'
-ACCEPTED_COLOR = '#30FF30'
+ACCEPTED_COLOR = GREEN # '#30FF30'
 REJECTED_COLOR = '#404040'
 
 SENT = 1
@@ -98,3 +98,15 @@ class PreferenceGraph:
                     if proposal:
                         animations.append(Uncreate(proposal[1]))
         return animations
+
+    def uncreate_not_accepted_arrows(self):
+        animations = []
+        for v in self.vertices:
+            for u in self.vertices:
+                if not v == u:
+                    proposal = self.proposals[v][u]
+                    if proposal[0] != ACCEPTED:
+                        animations.append(Uncreate(proposal[1]))
+                        self.proposals[v][u] = None
+        return animations
+        
