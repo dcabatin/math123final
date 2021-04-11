@@ -91,9 +91,8 @@ class PreferenceTable():
         circle.stroke_width = DEFAULT_STROKE_WIDTH*1.7
         circle = DashedVMobject(circle)
         self.proposals[sender][receiver] = circle
-
+        
         return [Create(circle)]
-
 
     def accept_proposal(self, sender, receiver):
         receiver_mob = self.pref_mobs[sender][receiver]
