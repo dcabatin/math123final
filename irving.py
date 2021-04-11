@@ -73,8 +73,8 @@ class IrvingSolver():
         try:
             first, proposals = self.stable_roommates_phase_1()
 
-            if self.scene:
-                self.scene.play(*self.G.uncreate())
+            # if self.scene:
+            #     self.scene.play(*self.G.uncreate())
 
             self.between_phases(proposals)
 
@@ -266,13 +266,21 @@ class IrvingSolver():
 
     def eliminate_rotation(self, p, q, first, last):
         for i in range(len(p)):
-            # q_i rejects p_i so that p_i proposes to q_i+1
+            # q_i rejects p_i so that p_i proposes to q_i+1, then q_i+1 rejects p_i+1 so that ...
+            # q_0 rejects p_0 so that p_0 proposes to q_1, then q_1 rejects p_1 and accepts p_0 so that p_1 proposes to q_2, ...
             self.symmetric_reject(p[i], q[i])
+            self.reject(p[i], q[i])
+            if i > 0:
+                self.accept(p[i-1], q[i])
+            if i == len(p) - 1:
+                self.propose(p[i], q[0])
+                self.accept(p[i], q[0])
+            else:
+                self.propose(p[i], q[i+1])
             
             # all successors of p_i-1 are removed from q_i's list, and q_i is removed from their lists
             for j in range(self.rank[q[i]][p[i-1]]+1, last[q[i]]):
                 reject = list(self.rank[q[i]].keys())[list(self.rank[q[i]].values()).index(j)]
-
                 self.symmetric_reject(reject, q[i])
                 
             last[q[i]] = self.rank[q[i]][p[i-1]]
