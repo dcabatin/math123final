@@ -72,10 +72,6 @@ class IrvingSolver():
     def match_roommates(self):
         try:
             first, proposals = self.stable_roommates_phase_1()
-
-            # if self.scene:
-            #     self.scene.play(*self.G.uncreate())
-
             self.between_phases(proposals)
 
             last = {p: len(self.preferences[p]) - 1 for p in self.players}
@@ -101,13 +97,19 @@ class IrvingSolver():
                 animations = self.G.uncreate_not_accepted_arrows()
                 if len(animations) > 0:
                     self.scene.play(*animations)
-                self.scene.wait(1)
+                self.scene.wait(5)
                 self.scene.play(*self.G.uncreate())
             return matches
 
         except NoStableMatchingException as e:
             if self.verbose:
                 print(e.msg)
+            if self.scene:
+                animations = self.G.uncreate_not_accepted_arrows()
+                if len(animations) > 0:
+                    self.scene.play(*animations)
+                self.scene.wait(5)
+
             return None
 
     def get_nth_favorite(self, p, n):
@@ -115,12 +117,6 @@ class IrvingSolver():
         if n > 0 and len(prefs) <= n:
             return None
         return prefs[n]
-
-    def first(self, p):
-        return self.preferences[p].index(self.get_nth_favorite(p, 0))
-    
-    def last(self, p):
-        return self.preferences[p].index(self.get_nth_favorite(p, -1))
     
     def second(self, p):
         return self.get_nth_favorite(p,1)
@@ -243,18 +239,6 @@ class IrvingSolver():
             
             # eliminate rotation
             self.eliminate_rotation(p, q, first, last)
-
-    def find_second_favorite(self, p, first, last):
-        count = 0
-        pref = self.preferences[p]
-        for j in range(first[p], len(self.preferences[p])):
-            if pref[j] is not None:
-                count += 1
-            if count == 0:
-                first[p] += 1
-            if count == 2:
-                return pref[j]
-        return None
 
     def find_rotation(self, i, p, q, first, last):
         second_favorite = self.second(p[i])
