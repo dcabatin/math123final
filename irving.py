@@ -96,7 +96,9 @@ class IrvingSolver():
                     pair = (p, self.preferences[p][last[p]])
                     visited.add(self.preferences[p][last[p]])
                     matches.append(pair)
-            
+
+            if self.scene:
+                self.scene.play(*self.G.uncreate_not_accepted_arrows())
             return matches
 
         except NoStableMatchingException as e:
