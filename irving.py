@@ -1,4 +1,5 @@
 from itertools import combinations
+from copy import deepcopy
 
 char_test_preferences = {
     'a': ['c', 'd', 'b', 'f', 'e'], 
@@ -32,6 +33,7 @@ class IrvingSolver():
         self.players = sorted(preferences.keys())
         self.n = len(self.players)
         self.preferences = preferences
+        self.original_preferences = deepcopy(preferences)
         self.rank = self.build_ranking_matrix()
         self.G = G
         self.T = T
@@ -55,7 +57,7 @@ class IrvingSolver():
                 raise NoStableMatchingException("Stable matching does not exist.")
         if first and last:
             for p in self.players:
-                if first[p] > last[p]:
+                if first[p] > last[p] or first[p] >= len(self.preferences[p]):
                     raise NoStableMatchingException("Stable matching does not exist.")
 
     def build_ranking_matrix(self):
@@ -69,7 +71,8 @@ class IrvingSolver():
 
     def match_roommates(self):
         try:
-            first, last = self.stable_roommates_phase_1()
+            first, last, proposals = self.stable_roommates_phase_1()
+            self.between_phases(proposals)
             self.stable_roommates_phase_2(first, last)
             self.clean_preferences(first, last)
             self.verify_solution(last)
@@ -125,16 +128,18 @@ class IrvingSolver():
         self.play_animation(p, q, "accept_proposal")
 
     def symmetric_reject(self, p, q):
-        if self.T:
-            self.scene.play(*self.T.reject_proposal(p, q))
-            self.scene.play(*self.T.reject_proposal(q, p))
-        self.preferences[p][self.rank[p][q]] = None
-        self.preferences[q][self.rank[q][p]] = None
+        if self.preferences[p][self.rank[p][q]] is not None:
+            self.preferences[p][self.rank[p][q]] = None
+            if self.scene and self.T:
+                self.scene.play(*self.T.reject_proposal(p, q))
+        if self.preferences[q][self.rank[q][p]] is not None:
+            self.preferences[q][self.rank[q][p]] = None
+            if self.scene and self.T:
+                self.scene.play(*self.T.reject_proposal(q, p))
 
     def one_way_reject(self, p, q):
-        if self.T:
-            self.scene.play(*self.T.reject_proposal(p,q))
-        self.preferences[p][self.rank[p]] = None
+        self.play_animation(p, q, "reject_proposal")
+        self.preferences[p][self.rank[p][q]] = None
 
     def stable_roommates_phase_1(self):
         accepted_proposal = {p: None for p in self.players}
@@ -146,8 +151,13 @@ class IrvingSolver():
             self.check_unsolvable()
             p = to_process[-1]
             
+
+            if first[p] >= len(self.preferences[p]):
+                raise NoStableMatchingException("Stable matching does not exist.")
             # determine who p should propose to
             while self.preferences[p][first[p]] is None:
+                if first[p] >= len(self.preferences[p]):
+                    raise NoStableMatchingException("Stable matching does not exist.")
                 first[p] += 1
                 
             top_pick = self.preferences[p][first[p]]
@@ -162,10 +172,10 @@ class IrvingSolver():
                 match_rank = self.rank[top_pick][p]
                 
                 # all candidates worse than i are rejected, must remove top_pick from their preference list
-                for idx in range(match_rank+1, last[top_pick]):
-                    reject = self.preferences[top_pick][idx]
-                    if reject is not None:
-                        self.symmetric_reject(top_pick, reject)
+                # for idx in range(match_rank+1, last[top_pick]):
+                #     reject = self.preferences[top_pick][idx]
+                #     if reject is not None:
+                #         self.symmetric_reject(top_pick, reject)
                 
                 # update last pointer
                 last[top_pick] = match_rank
@@ -179,9 +189,9 @@ class IrvingSolver():
 
             # current matching is preferred, i is rejected
             if curr_match_idx < potential_match_idx:
-                self.reject(p, top_pick)
+                self.one_way_reject(p, top_pick)
 
-                self.preferences[top_pick][potential_match_idx] = None
+                # self.preferences[top_pick][potential_match_idx] = None
                 
                 first[p] += 1 # start at next spot
 
@@ -191,17 +201,17 @@ class IrvingSolver():
             else: 
                 self.preferences[top_pick][curr_match_idx] = None
 
-                self.reject(accepted_proposal[top_pick], top_pick)
+                self.one_way_reject(accepted_proposal[top_pick], top_pick)
                 self.accept(p, top_pick)
                 
                 # old match is rejected by top_pick, must update their list
                 # top_pick_idx = self.rank[accepted_proposal[top_pick]][top_pick]
                 # self.preferences[accepted_proposal[top_pick]][top_pick_idx] = None
-                self.symmetric_reject(top_pick, accepted_proposal[top_pick])
-                for idx in range(potential_match_idx+1, last[top_pick]):
-                    reject = self.preferences[top_pick][idx]
-                    if reject is not None:
-                        self.symmetric_reject(top_pick, reject)
+                # self.symmetric_reject(top_pick, accepted_proposal[top_pick])
+                # for idx in range(potential_match_idx+1, last[top_pick]):
+                #     reject = self.preferences[top_pick][idx]
+                #     if reject is not None:
+                #         self.symmetric_reject(top_pick, reject)
                 
                 to_process.pop()
                 # add old match to to_process
@@ -211,13 +221,21 @@ class IrvingSolver():
                 last[top_pick] = potential_match_idx
         
         # done processing, so everyone has gotten a proposal accepted
-        return first, last
+        return first, last, accepted_proposal
+
+    def between_phases(self, proposals):
+        for q in self.players:
+            p = proposals[q] # p holds a proposal from p
+            proposal_idx = self.rank[q][p]
+            for i in range(proposal_idx+1, len(self.preferences[q])):
+                self.symmetric_reject(q, self.original_preferences[q][i])
+                
 
     def clean_preferences(self, first, last):
         for p in self.players:
             for j in range(len(self.preferences[p])):
                 if j < first[p] or j > last[p]:
-                    self.preferences[p][j] = None
+                    self.symmetric_reject(p, self.original_preferences[p][j])
 
     def stable_roommates_phase_2(self, first, last):
         while True:
