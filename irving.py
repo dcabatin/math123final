@@ -71,8 +71,18 @@ class IrvingSolver():
 
     def match_roommates(self):
         try:
-            first, last, proposals = self.stable_roommates_phase_1()
+            first, proposals = self.stable_roommates_phase_1()
+
+            if self.scene:
+                self.scene.play(*self.G.uncreate())
+
             self.between_phases(proposals)
+
+            last = {p: len(self.preferences[p]) - 1 for p in self.players}
+            for p in self.players:
+                while self.preferences[p][last[p]] is None:
+                    last[p] -= 1
+                    
             self.stable_roommates_phase_2(first, last)
             self.clean_preferences(first, last)
             self.verify_solution(last)
@@ -145,7 +155,6 @@ class IrvingSolver():
     def stable_roommates_phase_1(self):
         accepted_proposal = {p: None for p in self.players}
         first = {p: 0 for p in self.players}
-        last = {p: len(self.preferences[p]) for p in self.players}
         to_process = list(reversed(self.players))
         
         while to_process:
@@ -178,8 +187,6 @@ class IrvingSolver():
                 #     if reject is not None:
                 #         self.symmetric_reject(top_pick, reject)
                 
-                # update last pointer
-                last[top_pick] = match_rank
                 to_process.pop()
                 
                 continue
@@ -217,10 +224,9 @@ class IrvingSolver():
                 to_process.append(accepted_proposal[top_pick])
                 
                 accepted_proposal[top_pick] = p
-                last[top_pick] = potential_match_idx
         
         # done processing, so everyone has gotten a proposal accepted
-        return first, last, accepted_proposal
+        return first, accepted_proposal
 
     def between_phases(self, proposals):
         for q in self.players:
