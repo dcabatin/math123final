@@ -9,8 +9,8 @@ class IrvingScene(Scene):
     def construct(self, preferences=char_test_preferences):
         if not preferences:
             preferences = generate_sr_instance(['a', 'b', 'c', 'd', 'e', 'f'])
-        T = PreferenceTable(preferences, scale=1, center=[-3,0, 0])
-        G = PreferenceGraph(preferences, scale=1, center=(4,0))
+        T = PreferenceTable(preferences, scale=1, center=[-3.5,0, 0])
+        G = PreferenceGraph(preferences, scale=1, center=(4.5,0))
         S = IrvingSolver(preferences=preferences, T=T, G=G, scene=self)
         self.play(*T.create())
         self.play(*G.create())
