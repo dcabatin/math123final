@@ -101,6 +101,8 @@ class IrvingSolver():
                 animations = self.G.uncreate_not_accepted_arrows()
                 if len(animations) > 0:
                     self.scene.play(*animations)
+                self.scene.wait(1)
+                self.scene.play(*self.G.uncreate())
             return matches
 
         except NoStableMatchingException as e:
@@ -278,10 +280,10 @@ class IrvingSolver():
             if i > 0:
                 self.accept(p[i-1], q[i])
             if i == len(p) - 1:
-                self.propose(p[i], q[0])
+                self.propose(p[i], q[0], will_be_accepted = True)
                 self.accept(p[i], q[0])
             else:
-                self.propose(p[i], q[i+1])
+                self.propose(p[i], q[i+1], will_be_accepted = True)
             
             # all successors of p_i-1 are removed from q_i's list, and q_i is removed from their lists
             for j in range(self.rank[q[i]][p[i-1]]+1, last[q[i]]):

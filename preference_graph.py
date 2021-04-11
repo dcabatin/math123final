@@ -73,12 +73,14 @@ class PreferenceGraph:
             z_index = 1 if will_be_accepted else -1
         else:
             z_index = 0
+
+        arrow = Arrow(self.graph[sender],
+                      self.graph[receiver],
+                      z_index = z_index,
+                      **proposal_arrow_config)
+        arrow.tip.z_index = z_index
             
-        self.proposals[sender][receiver] = (SENT,
-                                            Arrow(self.graph[sender],
-                                                  self.graph[receiver],
-                                                  z_index = z_index,
-                                                  **proposal_arrow_config))
+        self.proposals[sender][receiver] = (SENT, arrow)
         return [Create(self.proposals[sender][receiver][1])]
 
     def reject_proposal(self, sender, receiver):
@@ -95,13 +97,44 @@ class PreferenceGraph:
     def accept_proposal(self, sender, receiver):
         assert self.proposals[sender][receiver][0] == SENT, \
                "proposal either not sent or already rejected/accepted"
-        
         arrow = self.proposals[sender][receiver][1]
-        arrow.set_z_index(1)
-        new_arrow = arrow.copy()
-        new_arrow = accept_arrow(new_arrow)
-        self.proposals[sender][receiver] = (ACCEPTED, arrow)
-        return [Transform(arrow, new_arrow)]
+        if self.proposals[receiver][sender] and \
+           self.proposals[receiver][sender][0] == ACCEPTED:
+            # we are in phase 2 and have completed a match
+            other_arrow = self.proposals[receiver][sender][1]
+            line = other_arrow.copy()
+            line_endpoints = Line(self.graph[receiver],
+                                  self.graph[sender],
+                                  buff = other_arrow.buff)
+            for key in ['max_tip_length_to_length_ratio',
+                        'max_stroke_width_to_length_ratio',
+                        'preserve_tip_size_when_scaling',
+                        'initial_stroke_width',
+                        'tip']:
+                del line.__dict__[key]
+            line.__class__ = Line
+            line.__dict__['family'] = [Line]
+            line.__dict__['submobjects'] = []
+            line.start = line_endpoints.start
+            line.end = line_endpoints.end
+            line.points = line_endpoints.points
+
+            self.proposals[sender][receiver] = (ACCEPTED, other_arrow)
+            self.proposals[receiver][sender] = (ACCEPTED, line)
+
+            new_arrow = other_arrow.copy()
+            new_arrow.tip.set_width(0.00001)
+            
+            return [Uncreate(arrow),
+                    Transform(other_arrow, new_arrow),
+                    Create(line)]
+        else:
+            # normal acceptance
+            arrow.set_z_index(1)
+            new_arrow = arrow.copy()
+            new_arrow = accept_arrow(new_arrow)
+            self.proposals[sender][receiver] = (ACCEPTED, arrow)
+            return [Transform(arrow, new_arrow)]
 
     def uncreate(self):
         animations = []
