@@ -123,23 +123,23 @@ class IrvingSolver():
     def second(self, p):
         return self.get_nth_favorite(p,1)
 
-    def play_animation(self, p, q, action):
+    def play_animation(self, action, *args, **kwargs):
         anims = []
         if self.G:
-            anims += getattr(self.G, action)(p, q)
+            anims += getattr(self.G, action)(*args, **kwargs)
         if self.T:
-            anims += getattr(self.T, action)(p, q)
+            anims += getattr(self.T, action)(*args, **kwargs)
         if self.scene:
             self.scene.play(*anims)
 
-    def propose(self, p, q):
-        self.play_animation(p, q, "propose")
+    def propose(self, p, q, **kwargs):
+        self.play_animation("propose", p, q, **kwargs)
         
     def reject(self, p, q):
-        self.play_animation(p, q, "reject_proposal")
+        self.play_animation("reject_proposal", p, q)
     
     def accept(self, p, q):
-        self.play_animation(p, q, "accept_proposal")
+        self.play_animation("accept_proposal", p, q)
 
     def symmetric_reject(self, p, q):
         if self.preferences[p][self.rank[p][q]] is not None:
@@ -152,7 +152,7 @@ class IrvingSolver():
                 self.scene.play(*self.T.reject_proposal(q, p))
 
     def one_way_reject(self, p, q):
-        self.play_animation(p, q, "reject_proposal")
+        self.play_animation("reject_proposal", p, q)
         self.preferences[p][self.rank[p][q]] = None
 
     def stable_roommates_phase_1(self):
@@ -174,10 +174,10 @@ class IrvingSolver():
                 
             top_pick = self.preferences[p][first[p]]
 
-            self.propose(p,top_pick)
             
             # top pick hasn't been proposed to yet, so they accept
             if accepted_proposal[top_pick] is None:
+                self.propose(p,top_pick, will_be_accepted = True)
                 self.accept(p, top_pick)
                 accepted_proposal[top_pick] = p
                 match_rank = self.rank[top_pick][p]
@@ -190,12 +190,14 @@ class IrvingSolver():
 
             # current matching is preferred, i is rejected
             if curr_match_idx < potential_match_idx:
+                self.propose(p,top_pick, will_be_accepted = False)
                 self.one_way_reject(p, top_pick)
                 first[p] += 1 # start at next spot
                 continue # keep p in to_process
             
             # accept accepted_proposal, so old match has to return to their preference list again
-            else: 
+            else:
+                self.propose(p,top_pick, will_be_accepted = True)
                 self.one_way_reject(accepted_proposal[top_pick], top_pick)
                 self.accept(p, top_pick)
                 to_process.pop()

@@ -14,13 +14,21 @@ proposal_arrow_config = {
 
 def accept_arrow(arrow):
     arrow.set_stroke_width(20)
-    arrow.tip.set_width(0.5)
+#    arrow.tip.set_width(0.5)
     arrow.set_color(ACCEPTED_COLOR)
+    arrow = VMobject.scale(arrow, 2)
+    arrow.scale(0.5)
+    arrow.set_stroke_width(20)
+    return arrow
     
 def reject_arrow(arrow):
     arrow.set_stroke_width(7)
-    arrow.tip.set_width(0.25)
+#    arrow.tip.set_width(0.25)
     arrow.set_color(REJECTED_COLOR)
+    arrow = VMobject.scale(arrow, 0.5)
+    arrow.scale(2)
+    arrow.set_stroke_width(7)
+    return arrow
 
 class PreferenceGraph:
     
@@ -55,16 +63,21 @@ class PreferenceGraph:
             animations.append(Create(self.graph[i]))
         return animations
 
-    def propose(self, sender, receiver):
+    def propose(self, sender, receiver, will_be_accepted = None):
         assert sender in self.graph.vertices, "proposal sender does not exist"
         assert receiver in self.graph.vertices, \
             "proposal receiver does not exist"
         assert not self.proposals[sender][receiver], "proposal already sent"
-        
+
+        if will_be_accepted is not None:
+            z_index = 1 if will_be_accepted else -1
+        else:
+            z_index = 0
+            
         self.proposals[sender][receiver] = (SENT,
                                             Arrow(self.graph[sender],
                                                   self.graph[receiver],
-                                                  z_index=0,
+                                                  z_index = z_index,
                                                   **proposal_arrow_config))
         return [Create(self.proposals[sender][receiver][1])]
 
@@ -75,7 +88,7 @@ class PreferenceGraph:
         arrow = self.proposals[sender][receiver][1]
         arrow.set_z_index(-1)
         new_arrow = arrow.copy()
-        reject_arrow(new_arrow)
+        new_arrow = reject_arrow(new_arrow)
         self.proposals[sender][receiver] = (REJECTED, arrow)
         return [Transform(arrow, new_arrow)]
 
@@ -86,7 +99,7 @@ class PreferenceGraph:
         arrow = self.proposals[sender][receiver][1]
         arrow.set_z_index(1)
         new_arrow = arrow.copy()
-        accept_arrow(new_arrow)
+        new_arrow = accept_arrow(new_arrow)
         self.proposals[sender][receiver] = (ACCEPTED, arrow)
         return [Transform(arrow, new_arrow)]
 

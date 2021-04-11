@@ -85,7 +85,7 @@ class PreferenceTable():
 
         return VGroup(*all_mobjs) if group else all_mobjs
 
-    def propose(self, sender, receiver):
+    def propose(self, sender, receiver, will_be_accepted = None):
         receiver_mob = self.pref_mobs[sender][receiver]
         circle = Circle(color=WHITE, ).surround(receiver_mob, buffer_factor=1)
         circle.stroke_width = DEFAULT_STROKE_WIDTH*1.7
