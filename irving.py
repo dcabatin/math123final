@@ -142,14 +142,17 @@ class IrvingSolver():
         self.play_animation(p, q, "accept_proposal")
 
     def symmetric_reject(self, p, q):
+        anims = []
         if self.preferences[p][self.rank[p][q]] is not None:
             self.preferences[p][self.rank[p][q]] = None
             if self.scene and self.T:
-                self.scene.play(*self.T.reject_proposal(p, q))
+                anims += self.T.reject_proposal(p, q)
         if self.preferences[q][self.rank[q][p]] is not None:
             self.preferences[q][self.rank[q][p]] = None
             if self.scene and self.T:
-                self.scene.play(*self.T.reject_proposal(q, p))
+                anims += self.T.reject_proposal(q, p)
+        if self.scene and anims:
+            self.scene.play(*anims)
 
     def one_way_reject(self, p, q):
         self.play_animation(p, q, "reject_proposal")
