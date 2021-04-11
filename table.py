@@ -1,9 +1,5 @@
 from manim import *
-
-class BracketlessMatrix(MobjectMatrix):
-    """Matrix with no brackets"""
-    def add_brackets(self, left="\\big[", right="\\big]"):
-        pass
+from bracketless import BracketlessMatrix
 
 
 class PreferenceTable():
@@ -84,6 +80,7 @@ class PreferenceTable():
         all_mobjs = mat + lines + circles
 
         return VGroup(*all_mobjs) if group else all_mobjs
+
 
     def propose(self, sender, receiver, will_be_accepted = None):
         receiver_mob = self.pref_mobs[sender][receiver]
