@@ -139,7 +139,6 @@ class IrvingSolver():
 
     def symmetric_reject(self, p, q):
         if self.preferences[p][self.rank[p][q]] is not None:
-
             self.preferences[p][self.rank[p][q]] = None
             if self.scene and self.T:
                 self.scene.play(*self.T.reject_proposal(p, q))
@@ -160,7 +159,6 @@ class IrvingSolver():
         while to_process:
             self.check_unsolvable()
             p = to_process[-1]
-            
 
             if first[p] >= len(self.preferences[p]):
                 raise NoStableMatchingException("Stable matching does not exist.")
@@ -178,17 +176,8 @@ class IrvingSolver():
             if accepted_proposal[top_pick] is None:
                 self.accept(p, top_pick)
                 accepted_proposal[top_pick] = p
-                
                 match_rank = self.rank[top_pick][p]
-                
-                # all candidates worse than i are rejected, must remove top_pick from their preference list
-                # for idx in range(match_rank+1, last[top_pick]):
-                #     reject = self.preferences[top_pick][idx]
-                #     if reject is not None:
-                #         self.symmetric_reject(top_pick, reject)
-                
                 to_process.pop()
-                
                 continue
             
             # determine if top pick prefers current match to matching with p
@@ -198,31 +187,16 @@ class IrvingSolver():
             # current matching is preferred, i is rejected
             if curr_match_idx < potential_match_idx:
                 self.one_way_reject(p, top_pick)
-
-                # self.preferences[top_pick][potential_match_idx] = None
-                
                 first[p] += 1 # start at next spot
-
                 continue # keep p in to_process
             
             # accept accepted_proposal, so old match has to return to their preference list again
             else: 
                 self.one_way_reject(accepted_proposal[top_pick], top_pick)
                 self.accept(p, top_pick)
-                
-                # old match is rejected by top_pick, must update their list
-                # top_pick_idx = self.rank[accepted_proposal[top_pick]][top_pick]
-                # self.preferences[accepted_proposal[top_pick]][top_pick_idx] = None
-                # self.symmetric_reject(top_pick, accepted_proposal[top_pick])
-                # for idx in range(potential_match_idx+1, last[top_pick]):
-                #     reject = self.preferences[top_pick][idx]
-                #     if reject is not None:
-                #         self.symmetric_reject(top_pick, reject)
-                
                 to_process.pop()
                 # add old match to to_process
                 to_process.append(accepted_proposal[top_pick])
-                
                 accepted_proposal[top_pick] = p
         
         # done processing, so everyone has gotten a proposal accepted
