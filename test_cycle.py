@@ -15,17 +15,30 @@ class TestCycle(Scene):
             c : [d, b, a],
             d : [a, b, c]
         }
-        t = PreferenceTable(preferences, center=[-3.5,0,0])
-        c = Cycle([a,b,c,a], [b, c, d, b], center=[3,0,0])
+        T = PreferenceTable(preferences, center=[-3.5,0,0])
+        C = Cycle([a,b,c,a], [b, c, d, b], center=[3,0,0])
 
-        self.play(*t.create())
+        self.play(*T.create())
+        self.play(
+            *T.propose(a, b),
+            *T.propose(b, c),
+            *T.propose(c, d)
+        )
+        self.play(
+            *T.accept_proposal(a, b),
+            *T.accept_proposal(b, c),
+            *T.accept_proposal(c, d)
+        )
+        self.wait()
 
-        for anim in c.create_from_table(t):
+        for anim in C.create_from_table(T):
             self.play(anim)
             self.wait(2)
         
-        self.play(*c.resolve_cycle())
-        self.wait()
-        self.play(*c.uncreate())
+        self.play(*C.cut_first_prefs(T))
+        self.wait(2)
+        self.play(*C.accept_second_prefs(T))
+        self.wait(2)
+        self.play(*C.uncreate())
 
         self.wait(2)

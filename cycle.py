@@ -73,6 +73,7 @@ class Cycle():
                     TransformFromCopy(table_bip1, cycle_bip1),
                     Create(self.arrows[2*i+1]),
                 ]
+                anims += table.propose(ai, self.Bs[i+1])
 
                 if i == 0:
                     table_bi = pref_mobs[ai][self.Bs[i]]
@@ -84,12 +85,26 @@ class Cycle():
         
         return all_anims
     
-    def resolve_cycle(self):
+    def cut_first_prefs(self, table):
         anims = []
         for i in range(0, len(self.arrows), 2):
             anims.append(FadeToColor(self.arrows[i], GREY_E))
+            anims += table.reject_proposal(self.As[i//2], self.Bs[i//2])
+        
+        anims.extend([
+            FadeToColor(self.A_mobs[-1], GREY_E),
+            FadeToColor(self.B_mobs[0], GREY_E)
+        ])
+
         return anims
 
+    def accept_second_prefs(self, table):
+        anims = []
+        for i in range(1, len(self.arrows), 2):
+            anims.append(FadeToColor(self.arrows[i], GREEN))
+            anims += table.accept_proposal(self.As[(i-1)//2], self.Bs[(i+1)//2])
+        
+        return anims
 
     def create(self):
         return [Create(m) for m in self.all_mobjs]
