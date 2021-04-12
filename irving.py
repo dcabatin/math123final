@@ -1,5 +1,6 @@
 from itertools import combinations
 from copy import deepcopy
+from cycle import Cycle
 
 char_test_preferences = {
     'a': ['c', 'd', 'b', 'f', 'e'], 
@@ -8,6 +9,14 @@ char_test_preferences = {
     'd': ['e', 'b', 'c', 'f', 'a'], 
     'e': ['c', 'a', 'b', 'd', 'f'], 
     'f': ['e', 'a', 'c', 'd', 'b']}
+
+phase_2_unsat_preferences = {
+    0: [4, 1, 3, 5, 2], 
+    1: [4, 5, 0, 3, 2], 
+    2: [0, 1, 5, 3, 4], 
+    3: [4, 2, 0, 5, 1], 
+    4: [5, 2, 1, 0, 3], 
+    5: [1, 4, 0, 3, 2]}
 
 test_preferences = {
     1: [3, 4, 2, 6, 5], 
@@ -29,7 +38,7 @@ class NoStableMatchingException(Exception):
         self.msg = msg
 
 class IrvingSolver():
-    def __init__(self, preferences=unsat_preferences, G=None, T=None, scene=None, verbose=False):
+    def __init__(self, preferences=test_preferences, G=None, T=None, scene=None, verbose=False):
         self.players = sorted(preferences.keys())
         self.n = len(self.players)
         self.preferences = preferences
@@ -80,11 +89,15 @@ class IrvingSolver():
                     last[p] -= 1
 
             if self.G:
+                self.scene.play(*self.G.uncreate())
+                self.G = None
+
+            if self.G:
                 animations = self.G.uncreate_not_accepted_arrows()
                 if len(animations) > 0:
                     self.scene.play(*animations)
                 self.scene.wait(3)
-                        
+          
             self.stable_roommates_phase_2(first, last)
             self.clean_preferences(first, last)
             self.verify_solution(last)
@@ -99,22 +112,22 @@ class IrvingSolver():
                     visited.add(self.preferences[p][last[p]])
                     matches.append(pair)
 
-            if self.scene:
+            if self.scene and self.G:
                 animations = self.G.uncreate_not_accepted_arrows()
                 if len(animations) > 0:
                     self.scene.play(*animations)
-                self.scene.wait(5)
+                self.scene.wait(4)
                 self.scene.play(*self.G.uncreate())
             return matches
 
         except NoStableMatchingException as e:
             if self.verbose:
                 print(e.msg)
-            if self.scene:
+            if self.scene and self.G:
                 animations = self.G.uncreate_not_accepted_arrows()
                 if len(animations) > 0:
                     self.scene.play(*animations)
-                self.scene.wait(5)
+                self.scene.wait(4)
 
             return None
 
@@ -217,6 +230,8 @@ class IrvingSolver():
                 accepted_proposal[top_pick] = p
         
         # done processing, so everyone has gotten a proposal accepted
+        if self.scene:
+            self.scene.wait(2)
         return first, accepted_proposal
 
     def between_phases(self, proposals):
@@ -225,6 +240,9 @@ class IrvingSolver():
             proposal_idx = self.rank[q][p]
             for r in self.original_preferences[q][proposal_idx+1:]:
                 self.symmetric_reject(q, r)
+
+        if self.scene:
+            self.scene.wait(2)
                 
 
     def clean_preferences(self, first, last):
@@ -265,23 +283,38 @@ class IrvingSolver():
         p.append(next_p)
         return self.find_rotation(i+1, p, q, first, last)
 
+    def animate_rotation_elimination(self, p, q):
+        C = Cycle(p + [p[0]], q + [q[0]], center=[3.5,0,0])
+        for anim in C.create_from_table(self.T):
+            self.scene.play(anim)
+            self.scene.wait(1)
+            
+        self.scene.play(*C.cut_first_prefs(self.T))
+        self.scene.wait(1)
+        self.scene.play(*C.accept_second_prefs(self.T))
+        self.scene.wait(1)
+        self.scene.play(*C.uncreate())
+
     def eliminate_rotation(self, p, q, first, last):
-        propose_anims = []
-        reject_anims = []
-        accept_anims = []
-        for i in range(len(p)):
-            reject_anims += self.reject(p[i], q[i], play=False)
-            if i > 0:
-                accept_anims += self.accept(p[i-1], q[i], play=False)
-            if i == len(p) - 1:
-                propose_anims += self.propose(p[i], q[0], play=False, will_be_accepted = True)
-                accept_anims += self.accept(p[i], q[0], play=False)
-            else:
-                propose_anims += self.propose(p[i], q[i+1], play=False, will_be_accepted = True)
+        if self.G:
+            propose_anims = []
+            reject_anims = []
+            accept_anims = []
+            for i in range(len(p)):
+                reject_anims += self.reject(p[i], q[i], play=False)
+                if i > 0:
+                    accept_anims += self.accept(p[i-1], q[i], play=False)
+                if i == len(p) - 1:
+                    propose_anims += self.propose(p[i], q[0], play=False, will_be_accepted = True)
+                    accept_anims += self.accept(p[i], q[0], play=False)
+                else:
+                    propose_anims += self.propose(p[i], q[i+1], play=False, will_be_accepted = True)
+            if self.scene:
+                self.scene.play(*reject_anims)
+                self.scene.play(*propose_anims)
+                self.scene.play(*accept_anims)
         if self.scene:
-            self.scene.play(*reject_anims)
-            self.scene.play(*propose_anims)
-            self.scene.play(*accept_anims)
+            self.animate_rotation_elimination(p, q)
 
         for i in range(len(p)):
             # q_i rejects p_i so that p_i proposes to q_i+1, then q_i+1 rejects p_i+1 so that ...
