@@ -6,6 +6,9 @@ class Cycle():
 
     def __init__(self, As, Bs, center=None):
 
+        self.As = As
+        self.Bs = Bs
+
         self.A_mobs = list(map(Tex, As))
         self.B_mobs = list(map(Tex, Bs))
 
@@ -43,22 +46,27 @@ class Cycle():
                     Arrow(start, end, color=WHITE).set_stroke_width(5)
                 )
 
-    def create_from_table(self, As, Bs):
-        assert (len(As) >= 2), "Cycle too small"
-        
+        self.all_mobjs = self.arrows + [self.cycle_mat]
+
+    def create_from_table(self, table):
+        assert (len(self.As) >= 2), "Cycle too small"
+
+        key_mobs = table.key_mobs
+        pref_mobs = table.pref_mobs
+
         all_anims = []
 
-        for i in range(len(As)):
-            table_ai, table_bi = As[i], Bs[i]
-            cycle_ai, cycle_bi = self.A_mobs[i], self.B_mobs[i]
+        for i, ai in enumerate(self.As):
+            table_ai = key_mobs[ai]
+            cycle_ai = self.A_mobs[i]
 
             anims = [
                 TransformFromCopy(table_ai, cycle_ai),
                 Create(self.arrows[2*i])
             ]
 
-            if i < len(As)-1:
-                table_bip1 = Bs[i+1]
+            if i < len(self.As)-1:
+                table_bip1 = pref_mobs[ai][self.Bs[i+1]]
                 cycle_bip1 = self.B_mobs[i+1]
                 
                 anims += [
@@ -67,15 +75,26 @@ class Cycle():
                 ]
 
                 if i == 0:
+                    table_bi = pref_mobs[ai][self.Bs[i]]
+                    cycle_bi = self.B_mobs[i]
+
                     anims.append(TransformFromCopy(table_bi, cycle_bi))
 
             all_anims.append(AnimationGroup(*anims))
         
         return all_anims
     
+    def resolve_cycle(self):
+        anims = []
+        for i in range(0, len(self.arrows), 2):
+            anims.append(FadeToColor(self.arrows[i], GREY_E))
+        return anims
+
 
     def create(self):
+        return [Create(m) for m in self.all_mobjs]
 
-        return [Create(a) for a in self.arrows] + [Create(self.cycle_mat)]
+    def uncreate(self):
+        return [Uncreate(m) for m in self.all_mobjs] 
 
 
