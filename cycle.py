@@ -23,7 +23,7 @@ class Cycle():
             h_buff=2
         )
 
-        if center:
+        if center is not None:
             self.cycle_mat.move_to(np.array(center))
         
         self.arrows = []
