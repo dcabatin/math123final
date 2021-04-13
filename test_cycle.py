@@ -30,15 +30,18 @@ class TestCycle(Scene):
             *T.accept_proposal(c, d)
         )
         self.wait()
-
-        for anim in C.create_from_table(T):
-            self.play(anim)
-            self.wait(2)
+        self.play(*C.create())
+        self.play(*C.accept(a, c))
+        self.play(*C.reject(a, b))
+        self.wait()
+        # for anim in C.create_from_table(T):
+        #     self.play(anim)
+        #     self.wait(2)
         
-        self.play(*C.cut_first_prefs(T))
-        self.wait(2)
-        self.play(*C.accept_second_prefs(T))
-        self.wait(2)
-        self.play(*C.uncreate())
+        # self.play(*C.cut_first_prefs(T))
+        # self.wait(2)
+        # self.play(*C.accept_second_prefs(T))
+        # self.wait(2)
+        # self.play(*C.uncreate())
 
         self.wait(2)

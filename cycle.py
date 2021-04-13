@@ -48,6 +48,20 @@ class Cycle():
 
         self.all_mobjs = self.arrows + [self.cycle_mat]
 
+    def get_arrow(self, a_i, b_j):
+        i = self.As.index(a_i)
+        j = self.Bs.index(b_j)
+
+        return self.arrows[i*2 + (j-i)]
+
+    def accept(self, a_i, b_j):
+        arrow = self.get_arrow(a_i, b_j)
+        return [FadeToColor(arrow, GREEN)]
+
+    def reject(self, a_i, b_j):
+        arrow = self.get_arrow(a_i, b_j)
+        return [FadeToColor(arrow, GREY_E)]
+
     def create_from_table(self, table):
         assert (len(self.As) >= 2), "Cycle too small"
 
@@ -84,7 +98,7 @@ class Cycle():
             all_anims.append(AnimationGroup(*anims))
         
         return all_anims
-    
+
     def cut_first_prefs(self, table):
         anims = []
         for i in range(0, len(self.arrows), 2):
