@@ -11,6 +11,3 @@ class CycleMustExist(Scene):
     def construct(self):
         pass
 
-class RemovingCyclesMaintainsSolution(Scene):
-    def construct(self):
-        pass
