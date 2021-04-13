@@ -48,17 +48,14 @@ class Cycle():
 
         self.all_mobjs = self.arrows + [self.cycle_mat]
 
-    def get_arrow(self, a_i, b_j):
-        i = self.As.index(a_i)
-        j = self.Bs.index(b_j)
-
+    def get_arrow(self, i, j):
         return self.arrows[i*2 + (j-i)]
 
-    def accept(self, a_i, b_j):
+    def accept(self, i, j):
         arrow = self.get_arrow(a_i, b_j)
         return [FadeToColor(arrow, GREEN)]
 
-    def reject(self, a_i, b_j):
+    def reject(self, i, j):
         arrow = self.get_arrow(a_i, b_j)
         return [FadeToColor(arrow, GREY_E)]
 
