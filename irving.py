@@ -33,6 +33,13 @@ unsat_preferences = {
     4: [1,2,3]
 }
 
+def validate_preferences(prefs):
+    players = sorted(prefs.keys())
+    for p, pref in prefs.items():
+        assert len(pref) >= len(players) - 1, "Player " + str(p) + " has an incomplete preference list!"
+        assert len(pref) <= len(players) - 1, "Player " + str(p) + " has too long of a preference list!"
+        assert set(players) - {p} == set(pref), "Player " + str(p) + " should only have other players on their list!"
+
 class NoStableMatchingException(Exception):
     def __init__(self, msg):
         self.msg = msg
