@@ -6,7 +6,7 @@ from preference_graph import PreferenceGraph
 from sr_instance import generate_sr_instance
 
 class IrvingScene(Scene):
-    def construct(self, preferences=phase_2_unsat_preferences):
+    def construct(self, preferences=char_test_preferences):
         if not preferences:
             preferences = generate_sr_instance(['a', 'b', 'c', 'd', 'e', 'f'])
         T = PreferenceTable(preferences, scale=1, center=[-3.5,0, 0])

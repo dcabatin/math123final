@@ -46,6 +46,7 @@ class NoStableMatchingException(Exception):
 
 class IrvingSolver():
     def __init__(self, preferences=test_preferences, G=None, T=None, scene=None, verbose=False):
+        validate_preferences(preferences)
         self.players = sorted(preferences.keys())
         self.n = len(self.players)
         self.preferences = preferences
@@ -125,6 +126,9 @@ class IrvingSolver():
                     self.scene.play(*animations)
                 self.scene.wait(4)
                 self.scene.play(*self.G.uncreate())
+            else:
+                self.scene.wait(4)
+                
             return matches
 
         except NoStableMatchingException as e:
@@ -291,7 +295,7 @@ class IrvingSolver():
         return self.find_rotation(i+1, p, q, first, last)
 
     def animate_rotation_elimination(self, p, q):
-        C = Cycle(p + [p[0]], q + [q[0]], center=[3.5,0,0])
+        C = Cycle(p + [p[0]], q + [q[0]], center=[4,0,0])
         for anim in C.create_from_table(self.T):
             self.scene.play(anim)
             self.scene.wait(1)
