@@ -52,11 +52,11 @@ class Cycle():
         return self.arrows[i*2 + (j-i)]
 
     def accept(self, i, j):
-        arrow = self.get_arrow(a_i, b_j)
+        arrow = self.get_arrow(i, j)
         return [FadeToColor(arrow, GREEN)]
 
     def reject(self, i, j):
-        arrow = self.get_arrow(a_i, b_j)
+        arrow = self.get_arrow(i, j)
         return [FadeToColor(arrow, GREY_E)]
 
     def create_from_table(self, table):
