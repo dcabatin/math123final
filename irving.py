@@ -88,6 +88,7 @@ class IrvingSolver():
             if self.G:
                 self.scene.play(*self.G.uncreate())
                 self.G = None
+                self.scene.wait(3)
           
             self.stable_roommates_phase_2(first, last)
             self.clean_preferences(first, last)
@@ -144,6 +145,7 @@ class IrvingSolver():
             return anims
         if self.scene:
             self.scene.play(*anims)
+            self.scene.wait(0.4)
 
     def propose(self, p, q, play=True, **kwargs):
         return self.play_animation("propose", p, q, play=play, **kwargs)
@@ -290,6 +292,7 @@ class IrvingSolver():
         self.scene.play(*C.accept_second_prefs(self.T))
         self.scene.wait(1)
         self.scene.play(*C.uncreate())
+        self.scene.wait(1)
 
     def eliminate_rotation(self, p, q, first, last):
         if self.G:
