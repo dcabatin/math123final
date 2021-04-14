@@ -31,8 +31,8 @@ class TestCycle(Scene):
         )
         self.wait()
         self.play(*C.create())
-        self.play(*C.accept(a, c))
-        self.play(*C.reject(a, b))
+        self.play(*C.accept(0, 1))
+        self.play(*C.reject(0, 1))
         self.wait()
         # for anim in C.create_from_table(T):
         #     self.play(anim)
