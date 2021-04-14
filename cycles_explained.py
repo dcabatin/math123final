@@ -21,17 +21,17 @@ class CycleDefinition(Scene):
         first_pref_arrows = [arrow for i,arrow in enumerate(cycle.arrows[:-2]) if i % 2 == 0]
         second_pref_arrows = [arrow for i,arrow in enumerate(cycle.arrows[:-2]) if i % 2 == 1]
 
-        self.play(*[Create(ar) for ar in first_pref_arrows])
+        self.play(*[Create(ar.curr_arrow()) for ar in first_pref_arrows])
         self.wait(2)
         definition3 = Tex("where the second favorite of $a_i$ is $b_{i+1},$", color=WHITE).scale(0.8).shift(2.4 * DOWN)
         self.play(Create(definition3))
         self.wait(1)
-        self.play(*[Create(ar) for ar in second_pref_arrows])
+        self.play(*[Create(ar.curr_arrow()) for ar in second_pref_arrows])
         self.wait(2)
         definition4 = Tex("wrapping around for $a_r$ and $a_1$.", color=WHITE).scale(0.8).shift(2.9 * DOWN)
         self.play(Create(definition4))
         self.play(Create(cycle.A_mobs[-1]), Create(cycle.B_mobs[-1]))
-        self.play(Create(cycle.arrows[-2]), Create(cycle.arrows[-1]))
+        self.play(Create(cycle.arrows[-2].curr_arrow()), Create(cycle.arrows[-1].curr_arrow()))
         self.wait(5)
 
         self.play(*[Uncreate(d) for d in (definition, definition2, definition3, definition4)])
