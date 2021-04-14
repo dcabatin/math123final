@@ -10,13 +10,19 @@ def validate_preferences(prefs):
         assert len(pref) <= len(players) - 1, "Player " + str(p) + " has too long of a preference list!"
         assert set(players) - {p} == set(pref), "Player " + str(p) + " should only have other players on their list!"
 
+def validate_incomplete_preferences(prefs):
+    players = set(sorted(prefs.keys()))
+    for p, pref in prefs.items():
+        for q in pref:
+            assert q in players, "Player " + str(p) + " has non-player " + str(q) + " in their preference list!" 
+
 class NoStableMatchingException(Exception):
     def __init__(self, msg):
         self.msg = msg
 
 class IrvingSolver():
     def __init__(self, preferences=char_test_preferences, G=None, T=None, scene=None, verbose=False):
-        # validate_preferences(preferences)
+        validate_preferences(preferences)
         self.players = sorted(preferences.keys())
         self.n = len(self.players)
         self.preferences = preferences

@@ -33,14 +33,14 @@ class Cycle():
             start = a_i.get_bottom()
             end = b_i.get_top()
 
-            self.arrows.append(SRArrow(start, end, 5, 0.2, ACCEPTED))
+            self.arrows.append(SRArrow(start, end, 5, 0.2, state=ACCEPTED))
 
             if i < len(As)-1:
                 b_ip1 = self.B_mobs[i+1]
                 start = a_i.get_corner(DOWN+RIGHT)
                 end = b_ip1.get_corner(UP+LEFT)
 
-                self.arrows.append(SRArrow(start, end, 5, 0.2, PROPOSED))
+                self.arrows.append(SRArrow(start, end, 5, 0.2, state=PROPOSED))
 
 
     def get_all_mobjs(self):
