@@ -167,6 +167,30 @@ class PreferenceGraph:
                         animations.append(Uncreate(proposal.curr_arrow()))
         return animations
 
+    def shift_in(self):
+        return self.shiftyboy(LEFT * 20)
+
+    def shift_out(self):
+        return self.shiftyboy(RIGHT * 20)
+    
+    def shiftyboy(self, amt):
+        animations = []
+        for v in self.graph:
+            animations.append(ApplyMethod(v.shift, amt))
+        for v in self.uncreations:
+            animations.append(ApplyMethod(v.shift, amt))    
+        for v in self.vertices:
+            for u in self.vertices:
+                if not v == u:
+                    proposal = self.proposals[v][u]
+                    if proposal:
+                        animations.append(
+                            ApplyMethod(
+                                proposal.curr_arrow().shift,
+                                amt))
+        return animations
+        
+    
     # def uncreate_not_accepted_arrows(self):
     #     animations = []
     #     for v in self.vertices:
