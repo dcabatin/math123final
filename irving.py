@@ -81,12 +81,6 @@ class IrvingSolver():
             if self.G:
                 self.scene.play(*self.G.uncreate())
                 self.G = None
-
-            if self.G:
-                animations = self.G.uncreate_not_accepted_arrows()
-                if len(animations) > 0:
-                    self.scene.play(*animations)
-                self.scene.wait(3)
           
             self.stable_roommates_phase_2(first, last)
             self.clean_preferences(first, last)
