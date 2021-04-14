@@ -27,7 +27,10 @@ class Cycle():
             self.cycle_mat.move_to(np.array(center))
         
         self.arrows = []
-        
+
+        if len(As) != len(Bs):
+            print("warning ken changed this and it might break")
+            
         for i, a_i in enumerate(self.A_mobs):
             b_i = self.B_mobs[i]
             start = a_i.get_bottom()
@@ -37,7 +40,7 @@ class Cycle():
                 Arrow(start, end, color=GREEN).set_stroke_width(5)
             )
 
-            if i < len(As)-1:
+            if i < len(Bs)-1:
                 b_ip1 = self.B_mobs[i+1]
                 start = a_i.get_corner(DOWN+RIGHT)
                 end = b_ip1.get_corner(UP+LEFT)
