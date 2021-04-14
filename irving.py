@@ -87,12 +87,6 @@ class IrvingSolver():
             if self.G:
                 self.scene.play(*self.G.uncreate())
                 self.G = None
-
-            if self.G:
-                animations = self.G.uncreate_not_accepted_arrows()
-                if len(animations) > 0:
-                    self.scene.play(*animations)
-                self.scene.wait(3)
           
             self.stable_roommates_phase_2(first, last)
             self.clean_preferences(first, last)
@@ -109,9 +103,9 @@ class IrvingSolver():
                     matches.append(pair)
 
             if self.scene and self.G:
-                animations = self.G.uncreate_not_accepted_arrows()
-                if len(animations) > 0:
-                    self.scene.play(*animations)
+#                animations = self.G.uncreate_not_accepted_arrows()
+#                if len(animations) > 0:
+#                    self.scene.play(*animations)
                 self.scene.wait(4)
                 self.scene.play(*self.G.uncreate())
             elif self.scene:
@@ -123,9 +117,9 @@ class IrvingSolver():
             if self.verbose:
                 print(e.msg)
             if self.scene and self.G:
-                animations = self.G.uncreate_not_accepted_arrows()
-                if len(animations) > 0:
-                    self.scene.play(*animations)
+#                animations = self.G.uncreate_not_accepted_arrows()
+#                if len(animations) > 0:
+#                    self.scene.play(*animations)
                 self.scene.wait(4)
 
             return None
