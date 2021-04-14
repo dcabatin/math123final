@@ -148,14 +148,14 @@ class PreferenceGraph:
                         animations.append(Uncreate(proposal[1]))
         return animations
 
-    def uncreate_not_accepted_arrows(self):
-        animations = []
-        for v in self.vertices:
-            for u in self.vertices:
-                if not v == u:
-                    proposal = self.proposals[v][u]
-                    if proposal and proposal[0] != ACCEPTED:
-                        animations.append(Uncreate(proposal[1]))
-                        self.proposals[v][u] = None
-        return animations
+    # def uncreate_not_accepted_arrows(self):
+    #     animations = []
+    #     for v in self.vertices:
+    #         for u in self.vertices:
+    #             if not v == u:
+    #                 proposal = self.proposals[v][u]
+    #                 if proposal and proposal[0] != ACCEPTED:
+    #                     animations.append(Uncreate(proposal[1]))
+    #                     self.proposals[v][u] = None
+    #     return animations
         
