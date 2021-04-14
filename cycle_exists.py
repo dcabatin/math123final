@@ -61,10 +61,18 @@ class CycleMustExist(Scene):
         self.wait(3)
         self.play(ReplacementTransform(text6, text7))
         self.wait(5)
-
         self.play(Create(C.arrows[3]))
         self.play(Create(B_mobs[2]))
-        self.wait()
+        self.wait(3)
+        
+        self.play(
+            Uncreate(text3),
+            Uncreate(text7)
+        )
+
+
+
+
 
 
 

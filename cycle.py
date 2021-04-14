@@ -1,6 +1,6 @@
 from manim import *
 from bracketless import BracketlessMatrix
-
+from SR_arrow import *
 
 class Cycle():
 
@@ -33,31 +33,33 @@ class Cycle():
             start = a_i.get_bottom()
             end = b_i.get_top()
 
-            self.arrows.append(
-                Arrow(start, end, color=GREEN).set_stroke_width(5)
-            )
+            self.arrows.append(SRArrow(start, end, 5, 0.2, ACCEPTED))
 
             if i < len(As)-1:
                 b_ip1 = self.B_mobs[i+1]
                 start = a_i.get_corner(DOWN+RIGHT)
                 end = b_ip1.get_corner(UP+LEFT)
 
-                self.arrows.append(
-                    Arrow(start, end, color=WHITE).set_stroke_width(5)
-                )
+                self.arrows.append(SRArrow(start, end, 5, 0.2, PROPOSED))
 
-        self.all_mobjs = self.arrows + [self.cycle_mat]
+
+    def get_all_mobjs(self):
+        all_mobjs = [
+            a.curr_arrow() for a in self.arrows
+        ]
+        return all_mobjs + [self.cycle_mat]
 
     def get_arrow(self, i, j):
         return self.arrows[i*2 + (j-i)]
 
     def accept(self, i, j):
-        arrow = self.get_arrow(i, j)
-        return [FadeToColor(arrow, GREEN)]
+        return [self.get_arrow(i, j).accept()]
 
     def reject(self, i, j):
-        arrow = self.get_arrow(i, j)
-        return [FadeToColor(arrow, GREY_E)]
+        # arrow = self.get_arrow(i, j)
+        # curr, rejected = sra.curr_arrow(), sra.rejected
+        # sra.state = REJECTED
+        return [self.get_arrow(i, j).reject()]
 
     def create_from_table(self, table):
         assert (len(self.As) >= 2), "Cycle too small"
@@ -73,7 +75,7 @@ class Cycle():
 
             anims = [
                 TransformFromCopy(table_ai, cycle_ai),
-                Create(self.arrows[2*i])
+                Create(self.arrows[2*i].curr_arrow())
             ]
 
             if i < len(self.As)-1:
@@ -82,7 +84,7 @@ class Cycle():
                 
                 anims += [
                     TransformFromCopy(table_bip1, cycle_bip1),
-                    Create(self.arrows[2*i+1]),
+                    Create(self.arrows[2*i+1].curr_arrow()),
                 ]
                 anims += table.propose(ai, self.Bs[i+1])
 
@@ -99,28 +101,23 @@ class Cycle():
     def cut_first_prefs(self, table):
         anims = []
         for i in range(0, len(self.arrows), 2):
-            anims.append(FadeToColor(self.arrows[i], GREY_E))
+            anims.append(self.arrows[i].reject())
             anims += table.reject_proposal(self.As[i//2], self.Bs[i//2])
         
-        anims.extend([
-            FadeToColor(self.A_mobs[-1], GREY_E),
-            FadeToColor(self.B_mobs[0], GREY_E)
-        ])
-
         return anims
 
     def accept_second_prefs(self, table):
         anims = []
         for i in range(1, len(self.arrows), 2):
-            anims.append(FadeToColor(self.arrows[i], GREEN))
+            anims.append(self.arrows[i].accept())
             anims += table.accept_proposal(self.As[(i-1)//2], self.Bs[(i+1)//2])
         
         return anims
 
     def create(self):
-        return [Create(m) for m in self.all_mobjs]
+        return [Create(m) for m in self.get_all_mobjs()]
 
     def uncreate(self):
-        return [Uncreate(m) for m in self.all_mobjs] 
+        return [Uncreate(m) for m in self.get_all_mobjs()] 
 
 
