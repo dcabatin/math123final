@@ -86,7 +86,7 @@ class PreferenceTable():
 
     def propose(self, sender, receiver, will_be_accepted = None):
         receiver_mob = self.pref_mobs[sender][receiver]
-        circle = Circle(color=WHITE, ).surround(receiver_mob, buffer_factor=1)
+        circle = Circle(color=WHITE).surround(receiver_mob, buffer_factor=1)
         circle.stroke_width = DEFAULT_STROKE_WIDTH*1.7
         circle = DashedVMobject(circle)
         self.proposals[sender][receiver] = circle
@@ -127,6 +127,19 @@ class PreferenceTable():
         all_mobjs = self.get_all_mobjs(group=True)
         all_mobjs.target = np.array(target)
         return [MoveToTarget(all_mobjs)]
+
+    def circle(self, row, player):
+        player = self.pref_mobs[row][player]
+        circle = Circle(color=WHITE).surround(player, buffer_factor=1)
+        self.proposals[row][player] = circle
+
+        return [Create(circle)]
+
+
+    def uncircle(self, row, player):
+        circle = self.proposals[row][player]
+
+        return [Uncreate(circle)]
 
 
     def uncreate(self):
