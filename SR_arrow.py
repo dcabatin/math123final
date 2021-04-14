@@ -74,7 +74,10 @@ class SRArrow():
         self.state = ACCEPTED
         return ReplacementTransform(curr, self.accepted)
 
-    
+    def mobjects(self):
+        arrows = [self.accepted, self.rejected, self.proposed]
+        arrows.extend(a.tip for a in arrows if hasattr(a, "tip"))
+        return arrows
 
             
 

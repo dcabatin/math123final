@@ -184,10 +184,10 @@ class PreferenceGraph:
                 if not v == u:
                     proposal = self.proposals[v][u]
                     if proposal:
-                        animations.append(
-                            ApplyMethod(
-                                proposal.curr_arrow().shift,
-                                amt))
+                        animations.extend([
+                            ApplyMethod(arr.shift,amt)
+                            for arr in proposal.mobjects()
+                        ])
         return animations
         
     
@@ -201,4 +201,29 @@ class PreferenceGraph:
     #                     animations.append(Uncreate(proposal[1]))
     #                     self.proposals[v][u] = None
     #     return animations
+
+    def create_from_matching(self, matchings, center = (20, 0)):
+        self.center = center
+        anim = []
+        self.graph = Graph(self.vertices, [], labels = True,
+                           layout="circular",
+                           vertex_config = self.vertex_config)
+        self.graph.move_to((*self.center, 0))
+        self.graph.scale(self.scale)
+        for i in self.vertices:
+            anim.append(Create(self.graph[i]))
+        anim2 = []
+        lines = []
+        for p, q in matchings:
+            lines.append(Line(self.graph[p],
+                              self.graph[q],
+                              color = ACCEPTED_COLOR,
+                              stroke_width = 20,
+                              buff = MED_SMALL_BUFF))
+            self.uncreations.append(lines[-1])
+            anim2.append(Create(lines[-1]))
+        shift_anim = self.shift_in() + [
+            ApplyMethod(l.shift, LEFT * 20) for l in lines
+        ]
+        return anim, anim2, shift_anim
         
