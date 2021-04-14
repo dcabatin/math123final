@@ -119,11 +119,6 @@ class IrvingSolver():
         except NoStableMatchingException as e:
             if self.verbose:
                 print(e.msg)
-            if self.scene and self.G:
-#                animations = self.G.uncreate_not_accepted_arrows()
-#                if len(animations) > 0:
-#                    self.scene.play(*animations)
-                self.scene.wait(4)
 
             return None
 
@@ -276,6 +271,8 @@ class IrvingSolver():
             
             # eliminate rotation
             self.eliminate_rotation(p, q, first, last)
+            if self.scene:
+                self.scene.wait(3)
 
     def find_rotation(self, i, p, q, first, last):
         second_favorite = self.second(p[i])
