@@ -17,7 +17,10 @@ class TestTable(Scene):
             c : [d, b, a],
             d : [a, b, c]
         }
-        t = PreferenceTable(preferences, center=[-3.5,0,0])
+
+        
+
+        t = PreferenceTable(preferences, center=left_center, width=0.9*config.frame_x_radius)
 
         self.play(*t.create())
         self.play(*t.propose(b, d))

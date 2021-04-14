@@ -4,7 +4,7 @@ from SR_arrow import *
 
 class Cycle():
 
-    def __init__(self, As, Bs, center=None):
+    def __init__(self, As, Bs, center=None, width=None):
 
         self.As = As
         self.Bs = Bs
@@ -25,6 +25,8 @@ class Cycle():
 
         if center is not None:
             self.cycle_mat.move_to(np.array(center))
+        if width is not None:
+            self.cycle_mat.scale_to_fit_width(width)
         
         self.arrows = []
 

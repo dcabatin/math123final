@@ -4,7 +4,7 @@ from bracketless import BracketlessMatrix
 
 class PreferenceTable():
 
-    def __init__(self, prefs, center=None, scale=None):
+    def __init__(self, prefs, center=None, scale=None, width=None):
         self.prefs = prefs
         self.center = center
         self.scale = scale
@@ -33,10 +33,12 @@ class PreferenceTable():
 
         vgroup = self.get_all_mobjs(group=True)
 
-        if center:
+        if center is not None:
             vgroup.move_to(np.array(center))
-        if scale:
+        if scale is not None:
             vgroup.scale(scale)
+        if width is not None:
+            vgroup.scale_to_fit_width(width)
 
 
         

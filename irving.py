@@ -2,6 +2,7 @@ from itertools import combinations
 from copy import deepcopy
 from cycle import Cycle
 from preferences import *
+from manim import config
 
 def validate_preferences(prefs):
     players = sorted(prefs.keys())
@@ -279,7 +280,7 @@ class IrvingSolver():
         return self.find_rotation(i+1, p, q, first, last)
 
     def animate_rotation_elimination(self, p, q):
-        C = Cycle(p + [p[0]], q + [q[0]], center=[4,0,0])
+        C = Cycle(p + [p[0]], q + [q[0]], center=[3.5,0,0], width=0.9*config['frame_x_radius'])
         for anim in C.create_from_table(self.T):
             self.scene.play(anim)
             self.scene.wait(1)
