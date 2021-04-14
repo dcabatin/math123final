@@ -9,3 +9,5 @@ python -m manim file.py ClassName -pql
 Click the button below to open a test environment in a Jupyter notebook! This will let you define your own example and generate an animation.
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/dcabatin/math123final/HEAD?filepath=irving_scene.ipynb)
+
+The implementation of Irving's algorithm is based on an implementation which can be found [here](https://github.com/jmoh3/stable_roommates/blob/master/stable_roommates.py). We have modified the algorithm for use with manim, generalized it for relatively abstract data types (players must be given as a hashable data type), and removed the constraint that preference cycles be complete.
