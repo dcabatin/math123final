@@ -13,4 +13,6 @@ class IrvingScene(Scene):
         S = IrvingSolver(preferences=preferences, T=T, G=G, scene=self)
         self.play(*T.create())
         self.play(*G.create())
+        self.wait(3)
         S.match_roommates()
+        self.wait(3)

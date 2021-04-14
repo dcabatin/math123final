@@ -156,4 +156,4 @@ class RejectImpliesNotMatchedScene(Scene):
             for t in texts
         ])
 
-        self.wait(1)
+        self.wait(4)
