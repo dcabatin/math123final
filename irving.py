@@ -2,7 +2,8 @@ from itertools import combinations
 from copy import deepcopy
 from cycle import Cycle
 from preferences import *
-from manim import config
+from manim import *
+from preference_graph import PreferenceGraph
 
 def validate_preferences(prefs):
     players = sorted(prefs.keys())
@@ -86,7 +87,7 @@ class IrvingSolver():
                     last[p] -= 1
 
             if self.G:
-                self.scene.play(*self.G.uncreate())
+                self.scene.play(*self.G.shift_out())
                 self.G = None
                 self.scene.wait(3)
           
@@ -104,13 +105,13 @@ class IrvingSolver():
                     visited.add(self.preferences[p][last[p]])
                     matches.append(pair)
 
-            if self.scene and self.G:
-#                animations = self.G.uncreate_not_accepted_arrows()
-#                if len(animations) > 0:
-#                    self.scene.play(*animations)
-                self.scene.wait(4)
-                self.scene.play(*self.G.uncreate())
-            elif self.scene:
+            if self.scene:
+                g = PreferenceGraph(self.original_preferences, center=(3.5,0))
+                a, b, c = g.create_from_matching(matches)
+                self.scene.play(*a, run_time=1e-6)
+                self.scene.play(*b, run_time=1e-6)
+                self.scene.play(*c)
+                # self.play(*g.uncreate())
                 self.scene.wait(4)
 
             return matches
@@ -235,9 +236,19 @@ class IrvingSolver():
     def between_phases(self, proposals):
         for q in self.players:
             p = proposals[q] # q holds a proposal from p
+            if self.scene:
+                to_circle = self.T.pref_mobs[q][p]
+                circle = Circle(color=WHITE).surround(to_circle, buffer_factor=1)
+                self.scene.play(Create(circle))
+                self.scene.wait(0.3)
+
             proposal_idx = self.rank[q][p]
             for r in self.original_preferences[q][proposal_idx+1:]:
                 self.symmetric_reject(q, r)
+
+            if self.scene:
+                self.scene.play(Uncreate(circle))
+                self.scene.wait(0.3)
 
         if self.scene:
             self.scene.wait(2)
