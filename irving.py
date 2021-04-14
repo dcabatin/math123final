@@ -111,9 +111,9 @@ class IrvingSolver():
             if self.verbose:
                 print(e.msg)
             if self.scene and self.G:
-                animations = self.G.uncreate_not_accepted_arrows()
-                if len(animations) > 0:
-                    self.scene.play(*animations)
+#                animations = self.G.uncreate_not_accepted_arrows()
+#                if len(animations) > 0:
+#                    self.scene.play(*animations)
                 self.scene.wait(4)
 
             return None
