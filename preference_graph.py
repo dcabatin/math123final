@@ -202,8 +202,8 @@ class PreferenceGraph:
     #                     self.proposals[v][u] = None
     #     return animations
 
-    def create_from_matching(self, matchings, center = (20, 0)):
-        self.center = center
+    def create_from_matching(self, matchings):
+        self.center = self.center[0] + 20, self.center[1]
         anim = []
         self.graph = Graph(self.vertices, [], labels = True,
                            layout="circular",
