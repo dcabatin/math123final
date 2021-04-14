@@ -1,4 +1,5 @@
 from manim import *
+from SR_arrow import SRArrow
 
 PROPOSAL_COLOR = 'white'
 ACCEPTED_COLOR = GREEN # '#30FF30'
@@ -51,6 +52,7 @@ class PreferenceGraph:
             }
             for v in self.vertices
         }
+        self.uncreations = []
 
     def create(self):
         animations = []
@@ -74,34 +76,44 @@ class PreferenceGraph:
         else:
             z_index = 0
 
-        arrow = Arrow(self.graph[sender],
-                      self.graph[receiver],
-                      z_index = z_index,
-                      **proposal_arrow_config)
-        arrow.tip.z_index = z_index
+        arrow = SRArrow(self.graph[sender],
+                        self.graph[receiver],
+                        stroke_width = 10,
+                        tip_length = 0.3,
+                        proposed_z_index = z_index)
+                      
             
-        self.proposals[sender][receiver] = (SENT, arrow)
-        return [Create(self.proposals[sender][receiver][1])]
+        # arrow = Arrow(self.graph[sender],
+        #               self.graph[receiver],
+        #               z_index = z_index,
+        #               **proposal_arrow_config)
+        # arrow.tip.z_index = z_index
+            
+        # self.proposals[sender][receiver] = (SENT, arrow)
+        # return [Create(self.proposals[sender][receiver][1])]
+        self.proposals[sender][receiver] = arrow
+        return [self.proposals[sender][receiver].propose()]
 
     def reject_proposal(self, sender, receiver):
-        assert self.proposals[sender][receiver][0] in {SENT, ACCEPTED}, \
+        assert self.proposals[sender][receiver].state in {SENT, ACCEPTED}, \
                "proposal either not sent or already rejected"
         
-        arrow = self.proposals[sender][receiver][1]
-        arrow.set_z_index(-1)
-        new_arrow = arrow.copy()
-        new_arrow = reject_arrow(new_arrow)
-        self.proposals[sender][receiver] = (REJECTED, arrow)
-        return [Transform(arrow, new_arrow)]
+        # arrow = self.proposals[sender][receiver][1]
+        # arrow.set_z_index(-1)
+        # new_arrow = arrow.copy()
+        # new_arrow = reject_arrow(new_arrow)
+        # self.proposals[sender][receiver] = (REJECTED, arrow)
+        # return [Transform(arrow, new_arrow)]
+        return [self.proposals[sender][receiver].reject()]
 
     def accept_proposal(self, sender, receiver):
-        assert self.proposals[sender][receiver][0] == SENT, \
+        assert self.proposals[sender][receiver].state == SENT, \
                "proposal either not sent or already rejected/accepted"
-        arrow = self.proposals[sender][receiver][1]
+        arrow = self.proposals[sender][receiver].curr_arrow()
         if self.proposals[receiver][sender] and \
-           self.proposals[receiver][sender][0] == ACCEPTED:
+           self.proposals[receiver][sender].state == ACCEPTED:
             # we are in phase 2 and have completed a match
-            other_arrow = self.proposals[receiver][sender][1]
+            other_arrow = self.proposals[receiver][sender].curr_arrow()
             line = other_arrow.copy()
             line_endpoints = Line(self.graph[receiver],
                                   self.graph[sender],
@@ -119,43 +131,50 @@ class PreferenceGraph:
             line.end = line_endpoints.end
             line.points = line_endpoints.points
 
-            self.proposals[sender][receiver] = (ACCEPTED, other_arrow)
-            self.proposals[receiver][sender] = (ACCEPTED, line)
-
             new_arrow = other_arrow.copy()
             new_arrow.tip.set_width(0.00001)
+
+            self.proposals[sender][receiver].accepted = other_arrow
+            self.proposals[receiver][sender].accepted = line
+            self.proposals[sender][receiver].state = ACCEPTED
+            self.proposals[receiver][sender].state = ACCEPTED
+
+            self.uncreations.extend([other_arrow, line, new_arrow])
             
             return [Uncreate(arrow),
-                    Transform(other_arrow, new_arrow),
+                    ReplacementTransform(other_arrow, new_arrow),
                     Create(line)]
         else:
-            # normal acceptance
-            arrow.set_z_index(1)
-            new_arrow = arrow.copy()
-            new_arrow = accept_arrow(new_arrow)
-            self.proposals[sender][receiver] = (ACCEPTED, arrow)
-            return [Transform(arrow, new_arrow)]
+            return [self.proposals[sender][receiver].accept()]
+            # # normal acceptance
+            # arrow.set_z_index(1)
+            # new_arrow = arrow.copy()
+            # new_arrow = accept_arrow(new_arrow)
+            # self.proposals[sender][receiver] = (ACCEPTED, arrow)
+            # return [Transform(arrow, new_arrow)]
 
     def uncreate(self):
         animations = []
         for v in self.graph:
             animations.append(Uncreate(v))
+        for v in self.uncreations:
+            animations.append(Uncreate(v))    
         for v in self.vertices:
             for u in self.vertices:
                 if not v == u:
                     proposal = self.proposals[v][u]
                     if proposal:
-                        animations.append(Uncreate(proposal[1]))
+                        animations.append(Uncreate(proposal.curr_arrow()))
         return animations
 
-    def uncreate_not_accepted_arrows(self):
-        animations = []
-        for v in self.vertices:
-            for u in self.vertices:
-                if not v == u:
-                    proposal = self.proposals[v][u]
-                    if proposal and proposal[0] != ACCEPTED:
-                        animations.append(Uncreate(proposal[1]))
-                        self.proposals[v][u] = None
-        return animations
+    # def uncreate_not_accepted_arrows(self):
+    #     animations = []
+    #     for v in self.vertices:
+    #         for u in self.vertices:
+    #             if not v == u:
+    #                 proposal = self.proposals[v][u]
+    #                 if proposal and proposal[0] != ACCEPTED:
+    #                     animations.append(Uncreate(proposal[1]))
+    #                     self.proposals[v][u] = None
+    #     return animations
         

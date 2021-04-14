@@ -27,7 +27,7 @@ class TestGraph(Scene):
         self.play(*g.accept_proposal("f", "d"))
         self.wait(1)
         self.play(*g.uncreate())
-        self.wait(1)
+        self.wait(2)
     
 class TestGraphIrving(Scene):
     def construct(self, preferences=None):
