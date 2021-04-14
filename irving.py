@@ -1,37 +1,7 @@
 from itertools import combinations
 from copy import deepcopy
 from cycle import Cycle
-
-char_test_preferences = {
-    'a': ['c', 'd', 'b', 'f', 'e'], 
-    'b': ['f', 'e', 'd', 'a', 'c'], 
-    'c': ['b', 'd', 'e', 'a', 'f'], 
-    'd': ['e', 'b', 'c', 'f', 'a'], 
-    'e': ['c', 'a', 'b', 'd', 'f'], 
-    'f': ['e', 'a', 'c', 'd', 'b']}
-
-phase_2_unsat_preferences = {
-    0: [4, 1, 3, 5, 2], 
-    1: [4, 5, 0, 3, 2], 
-    2: [0, 1, 5, 3, 4], 
-    3: [4, 2, 0, 5, 1], 
-    4: [5, 2, 1, 0, 3], 
-    5: [1, 4, 0, 3, 2]}
-
-test_preferences = {
-    1: [3, 4, 2, 6, 5], 
-    2: [6, 5, 4, 1, 3], 
-    3: [2, 4, 5, 1, 6], 
-    4: [5, 2, 3, 6, 1], 
-    5: [3, 1, 2, 4, 6], 
-    6: [5, 1, 3, 4, 2]}
-
-unsat_preferences = {
-    1: [2,3,4],
-    2: [3,1,4],
-    3: [1,2,4],
-    4: [1,2,3]
-}
+from preferences import *
 
 def validate_preferences(prefs):
     players = sorted(prefs.keys())
@@ -45,12 +15,14 @@ class NoStableMatchingException(Exception):
         self.msg = msg
 
 class IrvingSolver():
-    def __init__(self, preferences=test_preferences, G=None, T=None, scene=None, verbose=False):
-        validate_preferences(preferences)
+    def __init__(self, preferences=char_test_preferences, G=None, T=None, scene=None, verbose=False):
+        # validate_preferences(preferences)
         self.players = sorted(preferences.keys())
         self.n = len(self.players)
         self.preferences = preferences
         self.original_preferences = deepcopy(preferences)
+        self.adjacent = self.build_adjacency_matrix()
+        self.prune_preferences()
         self.rank = self.build_ranking_matrix()
         self.G = G
         self.T = T
@@ -78,13 +50,23 @@ class IrvingSolver():
                     raise NoStableMatchingException("Stable matching does not exist.")
 
     def build_ranking_matrix(self):
-        rank = {p : { q: None for q in self.preferences[p]} for p in self.players}
+        rank = {p : { q: len(self.preferences[p]) for q in self.players} for p in self.players}
         for p in self.players:
             for i in range(len(self.preferences[p])):
                 q = self.preferences[p][i]
-                rank[p][q] = i
+                if q is not None:
+                    rank[p][q] = i
         
         return rank
+
+    def build_adjacency_matrix(self):
+        return {p: {q: q in self.preferences[p] and p in self.preferences[q] for q in self.players} for p in self.players}
+
+    def prune_preferences(self):
+        for p in self.players:
+            for i, q in enumerate(self.preferences[p]):
+                if not self.adjacent[p][q]:
+                    self.preferences[p][i] = None
 
     def match_roommates(self):
         try:
@@ -126,9 +108,9 @@ class IrvingSolver():
                     self.scene.play(*animations)
                 self.scene.wait(4)
                 self.scene.play(*self.G.uncreate())
-            else:
+            elif self.scene:
                 self.scene.wait(4)
-                
+
             return matches
 
         except NoStableMatchingException as e:
@@ -173,6 +155,8 @@ class IrvingSolver():
 
     def symmetric_reject(self, p, q, play=True):
         anims = []
+        if not self.adjacent[p][q]:
+            return
         if self.preferences[p][self.rank[p][q]] is not None:
             self.preferences[p][self.rank[p][q]] = None
             if self.scene and self.T:

@@ -27,7 +27,7 @@ class Cycle():
             self.cycle_mat.move_to(np.array(center))
         
         self.arrows = []
-        
+
         for i, a_i in enumerate(self.A_mobs):
             b_i = self.B_mobs[i]
             start = a_i.get_bottom()
