@@ -28,7 +28,7 @@ class CycleDefinition(Scene):
         self.wait(1)
         self.play(*[Create(ar) for ar in second_pref_arrows])
         self.wait(2)
-        definition4 = Tex("wrapping around for $a_r$ and $a_1$.", color=WHITE).scale(0.8).shift(2.8 * DOWN)
+        definition4 = Tex("wrapping around for $a_r$ and $a_1$.", color=WHITE).scale(0.8).shift(2.9 * DOWN)
         self.play(Create(definition4))
         self.play(Create(cycle.A_mobs[-1]), Create(cycle.B_mobs[-1]))
         self.play(Create(cycle.arrows[-2]), Create(cycle.arrows[-1]))
@@ -43,19 +43,13 @@ class CycleDefinition(Scene):
 
         elimination2 = Tex("Each $b_i$ has $a_i$ as its least favorite, so it rejects", color=WHITE).scale(0.8).shift(2.4 * DOWN)
         self.play(Create(elimination2))
-        elimination3 = Tex("$a_i$ to match with $a_{i-1}$.", color=WHITE).scale(0.8).shift(2.8 * DOWN)
+        elimination3 = Tex("$a_i$ to match with $a_{i-1}$.", color=WHITE).scale(0.8).shift(2.9 * DOWN)
         self.play(Create(elimination3))
         self.wait(1)
 
         self.play(*(cycle.reject(0,0) + cycle.reject(5,5)))
         for i in range(5):
-            self.play(*cycle.reject(i+1, i+1))
-            self.play(*cycle.accept(i, i+1))
+            self.play(*cycle.reject(i+1,i+1))
+            self.play(*cycle.accept(i,i+1))
 
         self.wait(5)
-
-
-class CycleMustExist(Scene):
-    def construct(self):
-        pass
-
