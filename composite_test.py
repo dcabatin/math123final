@@ -1,5 +1,5 @@
 from manim import *
-from irving import *
+from irving_animator import *
 from table import PreferenceTable
 from preference_graph import PreferenceGraph
 from sr_instance import generate_sr_instance

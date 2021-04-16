@@ -1,6 +1,6 @@
 from manim import *
 
-from irving import *
+from irving_animator import *
 from table import PreferenceTable
 from sr_instance import generate_sr_instance
 from cycle import Cycle

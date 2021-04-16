@@ -1,5 +1,5 @@
 from numpy.random import permutation
-from irving import IrvingAnimator
+from irving_animator import IrvingAnimator
 from irving_old import *
 from player import *
 

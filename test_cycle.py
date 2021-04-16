@@ -1,5 +1,5 @@
 from manim import *
-from irving import *
+from irving_animator import *
 from cycle import Cycle
 from table import PreferenceTable
 
