@@ -22,7 +22,7 @@ class NoStableMatchingException(Exception):
     def __init__(self, msg):
         self.msg = msg
 
-class IrvingSolver():
+class IrvingAnimator():
     def __init__(self, preferences=char_test_preferences, G=None, T=None, scene=None, verbose=False):
         validate_preferences(preferences)
         self.players = sorted(preferences.keys())

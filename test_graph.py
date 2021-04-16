@@ -49,6 +49,6 @@ class TestGraphIrving(Scene):
         if not preferences:
             preferences = generate_sr_instance(['a', 'b', 'c', 'd', 'e', 'f'])
         g = PreferenceGraph(preferences, scale = 1)
-        S = IrvingSolver(preferences=preferences, G=g, scene=self)
+        S = IrvingAnimator(preferences=preferences, G=g, scene=self)
         self.play(*g.create())
         S.match_roommates()

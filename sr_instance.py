@@ -1,5 +1,5 @@
 from numpy.random import permutation
-from irving import IrvingSolver
+from irving import IrvingAnimator
 from irving_old import *
 from player import *
 
@@ -11,7 +11,7 @@ def generate_sr_instance(players):
 def test():
     preferences = generate_sr_instance(range(6))
     players = players_from_pref_dict(preferences)
-    S = IrvingSolver(preferences)
+    S = IrvingAnimator(preferences)
 
     solver_result = S.match_roommates()
     oracle_result = stable_roommates(players)

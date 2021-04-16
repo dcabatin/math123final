@@ -10,7 +10,7 @@ class IrvingScene(Scene):
             preferences = generate_sr_instance(['a', 'b', 'c', 'd', 'e', 'f'])
         T = PreferenceTable(preferences, width=0.9*config["frame_x_radius"], center=[-3.5,0, 0])
         G = PreferenceGraph(preferences, scale=1, center=(3.5,0))
-        S = IrvingSolver(preferences=preferences, T=T, G=G, scene=self)
+        S = IrvingAnimator(preferences=preferences, T=T, G=G, scene=self)
         self.play(*T.create())
         self.play(*G.create())
         self.wait(3)
