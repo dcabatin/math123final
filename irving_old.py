@@ -137,7 +137,14 @@ def stable_roommates(players):
     except Exception:
         return None
 
-    return {player: player.matching for player in players}
+    matching = set()
+    seen = set()
+    for player in players:
+        if player not in seen and player.matching not in seen:
+            matching.add((player, player.matching))
+        seen.add(player.matching)
+
+    return matching
 
 def matching_from_pref_dict(prefs):
     return stable_roommates(players_from_pref_dict(prefs))
