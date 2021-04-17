@@ -12,6 +12,7 @@ def validate_preferences(prefs):
 def validate_incomplete_preferences(prefs):
     players = set(sorted(prefs.keys()))
     for p, pref in prefs.items():
+        assert len(pref) == len(set(pref)), "Player " + str(p) + " has a repeated player in their preference list!"
         for q in pref:
             assert q in players, "Player " + str(p) + " has non-player " + str(q) + " in their preference list!" 
 
